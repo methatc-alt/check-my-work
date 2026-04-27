@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเช็คสถานะการเรียน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-5">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
+        <h1 class="text-2xl font-bold text-center mb-6 text-blue-600">เช็คสถานะ 50 คอร์ส</h1>
+        
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="studentId" placeholder="กรอกรหัสนักศึกษา" class="border p-2 w-full rounded">
+            <button onclick="checkStatus()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">ค้นหา</button>
+        </div>
+
+        <div id="result" class="hidden">
+            <h2 id="studentName" class="text-xl font-semibold mb-4"></h2>
+            <div id="courseList" class="grid grid-cols-1 gap-2">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            const id = document.getElementById('studentId').value;
+            const res = await fetch('data.json');
+            const data = await res.json();
+            const student = data.find(s => s.id === id);
+
+            const resultDiv = document.getElementById('result');
+            const courseList = document.getElementById('courseList');
+            const nameH2 = document.getElementById('studentName');
+
+            if (student) {
+                resultDiv.classList.remove('hidden');
+                nameH2.innerText = "ชื่อ: " + student.name;
+                courseList.innerHTML = '';
+                
+                for (const [course, status] of Object.entries(student.courses)) {
+                    const color = status === 'เรียนแล้ว' ? 'text-green-600' : 'text-red-500';
+                    courseList.innerHTML += `
+                        <div class="flex justify-between border-b py-2">
+                            <span>${course}</span>
+                            <span class="font-bold ${color}">${status}</span>
+                        </div>
+                    `;
+                }
+            } else {
+                alert('ไม่พบรหัสนักศึกษานี้');
+                resultDiv.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
