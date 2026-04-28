@@ -1,21 +1,24 @@
 [
   {
-    "id": "66001",
-    "name": "นายสมชาย ใจดี",
+    "id": "673320002-6",
+    "name": "นายกิตตินันท์ ปราบพยัคฆ์",
     "courses": {
-      "Course 01": "เรียนแล้ว",
-      "Course 02": "ยังไม่เรียน",
-      "Course 03": "เรียนแล้ว",
-      "Course 04": "เรียนแล้ว"
+      "ALD1002 มือใหม่หัดลงทุน Digital": "Done",
+      "ALD1001 มือใหม่หัดลงทุนต่างประเทศ": "Done",
+      "SED1006 How to Set Motivating Goals": "Not Done",
+      "SED1004 Communicate Effectively": "Done",
+      "SED1003 Critical Thinking for Business": "Not Done"
     }
   },
   {
-    "id": "66002",
-    "name": "นางสาวสมหญิง รักเรียน",
+    "id": "673320003-4",
+    "name": "นางสาวกิรติกา แสงกุดเรือ",
     "courses": {
-      "Course 01": "เรียนแล้ว",
-      "Course 02": "เรียนแล้ว",
-      "Course 03": "ยังไม่เรียน"
+      "ALD1002 มือใหม่หัดลงทุน Digital": "Done",
+      "ALD1001 มือใหม่หัดลงทุนต่างประเทศ": "Done",
+      "SED1006 How to Set Motivating Goals": "Not Done",
+      "SED1004 Communicate Effectively": "Done",
+      "SED1003 Critical Thinking for Business": "Not Done"
     }
   }
 ]
