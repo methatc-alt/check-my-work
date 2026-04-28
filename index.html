@@ -52,14 +52,20 @@
                 courseList.innerHTML = '';
                 
                 for (const [course, status] of Object.entries(student.courses)) {
-                    const color = status === 'เรียนแล้ว' ? 'text-green-600' : 'text-red-500';
-                    courseList.innerHTML += `
-                        <div class="flex justify-between border-b py-2">
-                            <span>${course}</span>
-                            <span class="font-bold ${color}">${status}</span>
-                        </div>
-                    `;
-                }
+    // แก้ตรงนี้: แปลง status เป็นตัวพิมพ์เล็กก่อน แล้วเช็คว่ามีคำว่า 'done' ไหม
+    // วิธีนี้จะรองรับทั้ง "Done", "done", "Done " (มีช่องว่าง)
+    const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+    
+    const color = isDone ? 'text-green-600' : 'text-red-500';
+    const statusText = isDone ? 'Done' : 'Not Done'; // หรือจะใช้ status เดิมก็ได้ครับ
+
+    courseList.innerHTML += `
+        <div class="flex justify-between border-b py-2 items-center">
+            <span class="text-sm text-gray-700 pr-4">${course}</span>
+            <span class="font-bold ${color} whitespace-nowrap">${status}</span>
+        </div>
+    `;
+}
             } else {
                 alert('ไม่พบรหัสนักศึกษานี้');
                 resultDiv.classList.add('hidden');
