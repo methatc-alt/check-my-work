@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเช็คสถานะการเรียน</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Prompt', sans-serif; }
+        .hidden-on-capture { transition: opacity 0.3s; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
-    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+    <div id="capture-area" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
         
         <div class="bg-gradient-to-r from-indigo-600 to-blue-500 p-10 text-center relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
@@ -21,166 +23,144 @@
         </div>
         
         <div class="p-6 md:p-10">
-            <div class="flex flex-col sm:flex-row gap-3 mb-8">
-                <input type="text" id="studentId" placeholder="พิมพ์รหัสนักศึกษาของคุณที่นี่..." 
+            <div class="flex flex-col sm:flex-row gap-3 mb-8 hidden-on-capture" id="search-section">
+                <input type="text" id="studentId" placeholder="กรอกรหัส (มีหรือไม่มีขีดก็ได้)" 
                        class="border-2 border-slate-200 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all text-lg shadow-sm">
                 <button onclick="fetchAndShow()" 
                         class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200">
-                    ค้นหาข้อมูล
+                    ค้นหา
                 </button>
             </div>
 
             <div id="result" class="hidden animate-in fade-in duration-500">
-                <div class="bg-indigo-50 rounded-2xl p-5 mb-6 border-l-8 border-indigo-500 flex flex-col md:flex-row md:items-center justify-between shadow-sm gap-4">
-                    <div class="flex items-center">
-                        <div class="bg-white p-2 rounded-full mr-4 shadow-sm">
-                            <svg class="w-6 h-6 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                            </svg>
-                        </div>
+                <div class="flex justify-between items-center mb-6">
+                    <div class="bg-indigo-50 rounded-2xl p-4 border-l-8 border-indigo-500 flex items-center shadow-sm flex-grow">
                         <h2 id="studentName" class="text-xl md:text-2xl font-bold text-indigo-900"></h2>
                     </div>
+                    <button onclick="saveAsImage()" class="ml-4 p-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors hidden-on-capture" title="บันทึกเป็นรูปภาพ">
+                        <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </button>
                 </div>
 
                 <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-6 shadow-sm">
                     <div class="flex justify-between items-end mb-2">
-                        <span class="font-bold text-slate-700">ความคืบหน้าของคุณ</span>
+                        <span class="font-bold text-slate-700">ความคืบหน้า</span>
                         <span class="text-2xl font-black text-indigo-600" id="progressText">0%</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-4 mb-4 overflow-hidden border border-slate-200">
-                        <div id="progressBar" class="bg-gradient-to-r from-green-400 to-green-500 h-4 rounded-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+                    <div class="w-full bg-slate-100 rounded-full h-4 mb-4 overflow-hidden">
+                        <div id="progressBar" class="bg-gradient-to-r from-green-400 to-green-500 h-4 rounded-full transition-all duration-1000" style="width: 0%"></div>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-4 text-center divide-x divide-slate-100 border-t pt-4">
-                        <div>
-                            <div class="text-xs text-slate-500 mb-1">ทั้งหมด</div>
-                            <div class="text-lg font-bold text-slate-800" id="statTotal">0</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-green-600 mb-1">เสร็จแล้ว (Done)</div>
-                            <div class="text-lg font-bold text-green-600" id="statDone">0</div>
-                        </div>
-                        <div>
-                            <div class="text-xs text-red-500 mb-1">ยังไม่เสร็จ (Not Done)</div>
-                            <div class="text-lg font-bold text-red-500" id="statNotDone">0</div>
-                        </div>
+                        <div><div class="text-xs text-slate-500">ทั้งหมด</div><div class="text-lg font-bold" id="statTotal">0</div></div>
+                        <div><div class="text-xs text-green-600">Done</div><div class="text-lg font-bold text-green-600" id="statDone">0</div></div>
+                        <div><div class="text-xs text-red-500">Not Done</div><div class="text-lg font-bold text-red-500" id="statNotDone">0</div></div>
                     </div>
                 </div>
                 
-                <div class="flex flex-wrap gap-2 mb-4 bg-slate-100 p-2 rounded-xl">
-                    <button onclick="renderCourses('all')" id="btn-all" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all bg-white text-indigo-700 shadow-sm">ทั้งหมด</button>
-                    <button onclick="renderCourses('done')" id="btn-done" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200">เสร็จแล้ว</button>
-                    <button onclick="renderCourses('notdone')" id="btn-notdone" class="flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200">ยังไม่เสร็จ</button>
+                <div class="flex gap-2 mb-4 bg-slate-100 p-2 rounded-xl hidden-on-capture">
+                    <button onclick="renderCourses('all')" id="btn-all" class="flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-white text-indigo-700 shadow-sm">ทั้งหมด</button>
+                    <button onclick="renderCourses('done')" id="btn-done" class="flex-1 py-2 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200">Done</button>
+                    <button onclick="renderCourses('notdone')" id="btn-notdone" class="flex-1 py-2 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200">Not Done</button>
                 </div>
 
-                <div class="grid grid-cols-1 gap-3" id="courseList">
-                    </div>
+                <div class="grid grid-cols-1 gap-3" id="courseList"></div>
+                
+                <p class="text-center text-slate-400 text-xs mt-8 pb-4">อัปเดตข้อมูลล่าสุด: 1 พฤษภาคม 2569</p>
             </div>
         </div>
     </div>
 
     <script>
-        let currentStudent = null; // เก็บข้อมูลนักศึกษาที่ค้นหาเจอไว้ใช้กับ Filter
+        let currentStudent = null;
 
-        // ให้กดปุ่ม Enter ค้นหาได้
-        document.getElementById('studentId').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') fetchAndShow();
-        });
+        document.getElementById('studentId').addEventListener('keypress', (e) => { if (e.key === 'Enter') fetchAndShow(); });
 
         async function fetchAndShow() {
-            const id = document.getElementById('studentId').value.trim();
-            if(!id) {
-                alert('กรุณากรอกรหัสนักศึกษาก่อนครับ');
-                return;
-            }
+            const rawInput = document.getElementById('studentId').value.trim();
+            if(!rawInput) return alert('กรุณากรอกรหัสนักศึกษาครับ');
+
+            // --- หัวใจสำคัญ: ลบขีดออกจากรหัสที่พิมพ์มา ---
+            const normalizedInput = rawInput.replace(/-/g, '');
 
             try {
-                // เติม ?t= เพื่อป้องกันไม่ให้เบราว์เซอร์จำข้อมูลเก่าเวลาคุณอัปเดต GitHub
                 const res = await fetch('data.json?t=' + new Date().getTime());
                 const data = await res.json();
-                currentStudent = data.find(s => s.id === id);
+                
+                // --- ค้นหาโดยการลบขีดออกจากรหัสในฐานข้อมูลด้วย ---
+                currentStudent = data.find(s => s.id.replace(/-/g, '') === normalizedInput);
 
                 if (currentStudent) {
                     document.getElementById('result').classList.remove('hidden');
                     document.getElementById('studentName').innerText = currentStudent.name;
-                    // เริ่มต้นให้แสดง "ทั้งหมด"
                     renderCourses('all'); 
                 } else {
-                    alert('ไม่พบรหัสนักศึกษานี้ในระบบครับ');
+                    alert('ไม่พบรหัสนักศึกษา หรือรหัสไม่ถูกต้องครับ');
                     document.getElementById('result').classList.add('hidden');
                 }
-            } catch (error) {
-                alert('เกิดข้อผิดพลาดในการโหลดข้อมูล โปรดลองอีกครั้งครับ');
-            }
+            } catch (error) { alert('เกิดข้อผิดพลาดในการโหลดข้อมูล'); }
         }
 
-        // ฟังก์ชันวาดรายวิชาตาม Filter
         function renderCourses(filterType) {
             const courseList = document.getElementById('courseList');
             courseList.innerHTML = '';
+            let total = 0, doneCount = 0, notDoneCount = 0;
 
-            let total = 0;
-            let doneCount = 0;
-            let notDoneCount = 0;
-
-            // วนลูปนับจำนวนและสร้าง HTML
             for (const [course, status] of Object.entries(currentStudent.courses)) {
                 total++;
                 const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
-                
-                if (isDone) doneCount++;
-                else notDoneCount++;
+                if (isDone) doneCount++; else notDoneCount++;
 
-                // กรองข้อมูล (ถ้าเลือก 'done' แต่ยังไม่เสร็จ ให้ข้ามไป)
                 if (filterType === 'done' && !isDone) continue;
                 if (filterType === 'notdone' && isDone) continue;
 
-                const badgeColors = isDone 
-                    ? 'bg-green-100 text-green-700 border border-green-200' 
-                    : 'bg-red-100 text-red-700 border border-red-200';
-                
-                const icon = isDone 
-                    ? `<svg class="w-4 h-4 mr-1.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`
-                    : `<svg class="w-4 h-4 mr-1.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`;
-
+                const badge = isDone ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200';
                 courseList.innerHTML += `
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white border border-slate-200 p-4 rounded-xl hover:shadow-md hover:border-indigo-200 transition-all duration-200">
-                        <span class="text-sm md:text-base font-medium text-slate-700 mb-2 sm:mb-0 pr-4">${course}</span>
-                        <span class="inline-flex items-center self-start sm:self-auto ${badgeColors} px-4 py-1.5 rounded-full text-sm font-bold shadow-sm whitespace-nowrap">
-                            ${icon} ${status}
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                        <span class="text-sm font-medium text-slate-700 mb-2 sm:mb-0">${course}</span>
+                        <span class="inline-flex items-center self-start sm:self-auto ${badge} border px-3 py-1 rounded-full text-xs font-bold uppercase">
+                            ${status}
                         </span>
-                    </div>
-                `;
+                    </div>`;
             }
 
-            // อัปเดตตัวเลขสรุป
             document.getElementById('statTotal').innerText = total;
             document.getElementById('statDone').innerText = doneCount;
             document.getElementById('statNotDone').innerText = notDoneCount;
-
-            // คำนวณเปอร์เซ็นต์สำหรับ Progress bar
             const percent = total === 0 ? 0 : Math.round((doneCount / total) * 100);
-            
-            // ทำให้บาร์ค่อยๆ วิ่งไปหาเปอร์เซ็นต์ที่ถูกต้อง
             setTimeout(() => {
                 document.getElementById('progressBar').style.width = percent + '%';
                 document.getElementById('progressText').innerText = percent + '%';
             }, 100);
-
-            // เปลี่ยนสีปุ่ม Filter ที่ถูกกด
             updateFilterButtons(filterType);
         }
 
-        function updateFilterButtons(activeFilter) {
-            const btns = ['all', 'done', 'notdone'];
-            btns.forEach(btn => {
-                const el = document.getElementById('btn-' + btn);
-                if (btn === activeFilter) {
-                    el.className = "flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all bg-white text-indigo-700 shadow-sm";
-                } else {
-                    el.className = "flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200";
-                }
+        function updateFilterButtons(active) {
+            ['all', 'done', 'notdone'].forEach(b => {
+                document.getElementById('btn-'+b).className = (b === active) 
+                ? "flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-white text-indigo-700 shadow-sm"
+                : "flex-1 py-2 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200";
             });
+        }
+
+        function saveAsImage() {
+            // ซ่อนปุ่มและช่องค้นหาก่อนบันทึกภาพเพื่อให้รูปดูสวยงาม
+            const hiddens = document.querySelectorAll('.hidden-on-capture');
+            hiddens.forEach(el => el.style.opacity = '0');
+
+            setTimeout(() => {
+                html2canvas(document.querySelector("#capture-area"), {
+                    scale: 2, // เพิ่มความชัด
+                    backgroundColor: "#f8fafc"
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `คะแนน-${currentStudent.name}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    // แสดงปุ่มและช่องค้นหากลับมา
+                    hiddens.forEach(el => el.style.opacity = '1');
+                });
+            }, 500);
         }
     </script>
 </body>
