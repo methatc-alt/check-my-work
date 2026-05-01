@@ -7,18 +7,41 @@
       "ALD1001 มือใหม่หัดลงทุนต่างประเทศ": "Done",
       "SED1006 How to Set Motivating Goals": "Not Done",
       "SED1004 Communicate Effectively": "Done",
-      "SED1003 Critical Thinking for Business": "Not Done"
+      "SED1003 Critical Thinking for Business": "Not Done",
+      "MKD1006 How to Set Motivating Goals": "Not Done",
+      "FAM1005 Governance in Family Business": "Not Done",
+      "ESD1004 Innovation Mindset": "Not Done",
+      "ESD1003 Startup Business": "Not Done",
+      "ESD1002 Pitching Technique": "Not Done",
+      "EQD1004 ลงทุนหุ้นออนไลน์ด้วย Settrade Streaming": "Not Done",
+      "EFD1005 Fundraising Journey": "Not Done",
+      "EFD1004 Alternative Fundraising and Exit Strategy": "Not Done"
     }
   },
   {
     "id": "673320003-4",
     "name": "นางสาวกิรติกา แสงกุดเรือ",
     "courses": {
-      "ALD1002 มือใหม่หัดลงทุน Digital": "Done",
-      "ALD1001 มือใหม่หัดลงทุนต่างประเทศ": "Done",
+      "ALD1002 มือใหม่หัดลงทุน Digital": "Not Done",
+      "ALD1001 มือใหม่หัดลงทุนต่างประเทศ": "Not Done",
       "SED1006 How to Set Motivating Goals": "Not Done",
-      "SED1004 Communicate Effectively": "Done",
-      "SED1003 Critical Thinking for Business": "Not Done"
+      "SED1004 Communicate Effectively": "Not Done",
+      "SED1003 Critical Thinking for Business": "Not Done",
+      "MKD1006 How to Set Motivating Goals": "Not Done",
+      "FAM1005 Governance in Family Business": "Not Done",
+      "ESD1004 Innovation Mindset": "Not Done",
+      "ESD1003 Startup Business": "Not Done",
+      "ESD1002 Pitching Technique": "Not Done",
+      "EQD1004 ลงทุนหุ้นออนไลน์ด้วย Settrade Streaming": "Not Done",
+      "EFD1005 Fundraising Journey": "Not Done",
+      "EFD1004 Alternative Fundraising and Exit Strategy": "Not Done"
+    }
+  },
+  {
+    "id": "",
+    "name": "",
+    "courses": {
+      " ": ""
     }
   }
 ]
