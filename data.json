@@ -15,7 +15,23 @@
       "ESD1002 Pitching Technique": "Not Done",
       "EQD1004 ลงทุนหุ้นออนไลน์ด้วย Settrade Streaming": "Not Done",
       "EFD1005 Fundraising Journey": "Not Done",
-      "EFD1004 Alternative Fundraising and Exit Strategy": "Not Done"
+      "EFD1004 Alternative Fundraising and Exit Strategy": "Not Done",
+      "EFD1003 Fundraising for Growth": "Done",
+      "EFD1002 Fundraising for Seed and Early": "Done",
+      "EFD1001 Introduction for Fundraising": "Done",
+      "BMD1020 Business Feasibility and Risk Management": "Done",
+      "BMD1007 Business Model Canvas": "Done",
+      "BMD1005 Building the Right Culture for Your Startup": "Not Done",
+      "BMD1004 Digital Marketing": "Not Done",
+      "BMD1003 Lean Startup": "Not Done",
+      "BMD1002 Lean Canvas": "Not Done",
+      "DWD1001 ลงทุน DW ฉบับมือใหม่": "Not Done",
+      "DPD1001 ลงทุน DR ฉบับมือใหม่": "Not Done",
+      "DBD1001 ลงทุนตราสารหนี้ฉบับมือใหม่": "Not Done",
+      "PFD2008 ความน่าสนใจของสินทรัพย์ทางเลือก": "Not Done",
+      "PFD2002 ความเสี่ยงและผลตอบแทนของการลงทุน": "Done",
+      "MFD1001 ลงทุนกองทุนรวมฉบับมือใหม่": "Not Done",
+      "DRD1404 มือใหม่หัดเทรด TFEX FX Futures": "Done"
     }
   },
   {
@@ -34,14 +50,23 @@
       "ESD1002 Pitching Technique": "Not Done",
       "EQD1004 ลงทุนหุ้นออนไลน์ด้วย Settrade Streaming": "Not Done",
       "EFD1005 Fundraising Journey": "Not Done",
-      "EFD1004 Alternative Fundraising and Exit Strategy": "Not Done"
-    }
-  },
-  {
-    "id": "",
-    "name": "",
-    "courses": {
-      " ": ""
+      "EFD1004 Alternative Fundraising and Exit Strategy": "Not Done",
+      "EFD1003 Fundraising for Growth": "Done",
+      "EFD1002 Fundraising for Seed and Early": "Done",
+      "EFD1001 Introduction for Fundraising": "Done",
+      "BMD1020 Business Feasibility and Risk Management": "Done",
+      "BMD1007 Business Model Canvas": "Done",
+      "BMD1005 Building the Right Culture for Your Startup": "Not Done",
+      "BMD1004 Digital Marketing": "Not Done",
+      "BMD1003 Lean Startup": "Not Done",
+      "BMD1002 Lean Canvas": "Not Done",
+      "DWD1001 ลงทุน DW ฉบับมือใหม่": "Not Done",
+      "DPD1001 ลงทุน DR ฉบับมือใหม่": "Not Done",
+      "DBD1001 ลงทุนตราสารหนี้ฉบับมือใหม่": "Not Done",
+      "PFD2008 ความน่าสนใจของสินทรัพย์ทางเลือก": "Not Done",
+      "PFD2002 ความเสี่ยงและผลตอบแทนของการลงทุน": "Done",
+      "MFD1001 ลงทุนกองทุนรวมฉบับมือใหม่": "Not Done",
+      "DRD1404 มือใหม่หัดเทรด TFEX FX Futures": "Done"
     }
   }
 ]
