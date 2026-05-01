@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเช็คสถานะการเรียน</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Prompt', sans-serif; }
-        .hidden-on-capture { transition: opacity 0.3s; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
-    <div id="capture-area" class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
         
         <div class="bg-gradient-to-r from-indigo-600 to-blue-500 p-10 text-center relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
@@ -23,7 +21,7 @@
         </div>
         
         <div class="p-6 md:p-10">
-            <div class="flex flex-col sm:flex-row gap-3 mb-8 hidden-on-capture" id="search-section">
+            <div class="flex flex-col sm:flex-row gap-3 mb-8" id="search-section">
                 <input type="text" id="studentId" placeholder="กรอกรหัส (มีหรือไม่มีขีดก็ได้)" 
                        class="border-2 border-slate-200 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all text-lg shadow-sm">
                 <button onclick="fetchAndShow()" 
@@ -37,9 +35,6 @@
                     <div class="bg-indigo-50 rounded-2xl p-4 border-l-8 border-indigo-500 flex items-center shadow-sm flex-grow">
                         <h2 id="studentName" class="text-xl md:text-2xl font-bold text-indigo-900"></h2>
                     </div>
-                    <button onclick="saveAsImage()" class="ml-4 p-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors hidden-on-capture" title="บันทึกเป็นรูปภาพ">
-                        <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </button>
                 </div>
 
                 <div class="bg-white border border-slate-200 rounded-2xl p-5 mb-6 shadow-sm">
@@ -58,7 +53,7 @@
                     </div>
                 </div>
                 
-                <div class="flex gap-2 mb-4 bg-slate-100 p-2 rounded-xl hidden-on-capture">
+                <div class="flex gap-2 mb-4 bg-slate-100 p-2 rounded-xl">
                     <button onclick="renderCourses('all')" id="btn-all" class="flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-white text-indigo-700 shadow-sm">ทั้งหมด</button>
                     <button onclick="renderCourses('done')" id="btn-done" class="flex-1 py-2 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200">Done</button>
                     <button onclick="renderCourses('notdone')" id="btn-notdone" class="flex-1 py-2 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200">Not Done</button>
@@ -80,14 +75,14 @@
             const rawInput = document.getElementById('studentId').value.trim();
             if(!rawInput) return alert('กรุณากรอกรหัสนักศึกษาครับ');
 
-            // --- หัวใจสำคัญ: ลบขีดออกจากรหัสที่พิมพ์มา ---
+            // ลบขีดออกจากรหัสที่พิมพ์มา
             const normalizedInput = rawInput.replace(/-/g, '');
 
             try {
                 const res = await fetch('data.json?t=' + new Date().getTime());
                 const data = await res.json();
                 
-                // --- ค้นหาโดยการลบขีดออกจากรหัสในฐานข้อมูลด้วย ---
+                // ค้นหาโดยการลบขีดออกจากรหัสในฐานข้อมูลด้วย
                 currentStudent = data.find(s => s.id.replace(/-/g, '') === normalizedInput);
 
                 if (currentStudent) {
@@ -116,7 +111,7 @@
 
                 const badge = isDone ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200';
                 courseList.innerHTML += `
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200">
                         <span class="text-sm font-medium text-slate-700 mb-2 sm:mb-0">${course}</span>
                         <span class="inline-flex items-center self-start sm:self-auto ${badge} border px-3 py-1 rounded-full text-xs font-bold uppercase">
                             ${status}
@@ -141,26 +136,6 @@
                 ? "flex-1 py-2 rounded-lg font-semibold text-sm transition-all bg-white text-indigo-700 shadow-sm"
                 : "flex-1 py-2 rounded-lg font-semibold text-sm transition-all text-slate-600 hover:bg-slate-200";
             });
-        }
-
-        function saveAsImage() {
-            // ซ่อนปุ่มและช่องค้นหาก่อนบันทึกภาพเพื่อให้รูปดูสวยงาม
-            const hiddens = document.querySelectorAll('.hidden-on-capture');
-            hiddens.forEach(el => el.style.opacity = '0');
-
-            setTimeout(() => {
-                html2canvas(document.querySelector("#capture-area"), {
-                    scale: 2, // เพิ่มความชัด
-                    backgroundColor: "#f8fafc"
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `คะแนน-${currentStudent.name}.png`;
-                    link.href = canvas.toDataURL();
-                    link.click();
-                    // แสดงปุ่มและช่องค้นหากลับมา
-                    hiddens.forEach(el => el.style.opacity = '1');
-                });
-            }, 500);
         }
     </script>
 </body>
