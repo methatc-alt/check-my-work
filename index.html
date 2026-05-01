@@ -5,70 +5,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเช็คสถานะการเรียน</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4 md:p-10 font-sans">
-    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-        <div class="bg-indigo-600 p-8 text-center">
-            <h1 class="text-3xl font-bold text-white mb-2">ระบบติดตามสถานะการเรียน</h1>
-            <p class="text-indigo-100 opacity-90">ปีการศึกษา 2569 | set-elearning</p>
+<body class="bg-slate-50 min-h-screen p-4 md:p-10 text-slate-800">
+    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+        
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-500 p-10 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+            <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-20 h-20 bg-white opacity-10 rounded-full blur-lg"></div>
+            
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3 relative z-10">ระบบติดตามสถานะการเรียน</h1>
+            <p class="text-indigo-100 opacity-90 text-sm md:text-base relative z-10">ปีการศึกษา 2569 | set-elearning</p>
         </div>
         
-        <div class="p-8">
+        <div class="p-6 md:p-10">
             <div class="flex flex-col sm:flex-row gap-3 mb-8">
                 <input type="text" id="studentId" placeholder="พิมพ์รหัสนักศึกษาของคุณที่นี่..." 
-                       class="border-2 border-slate-200 p-3 flex-grow rounded-xl focus:border-indigo-500 focus:outline-none transition-all">
+                       class="border-2 border-slate-200 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all text-lg shadow-sm">
                 <button onclick="checkStatus()" 
-                        class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all">
+                        class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 active:scale-95 transition-all duration-200">
                     ค้นหาข้อมูล
                 </button>
             </div>
 
             <div id="result" class="hidden animate-in fade-in duration-500">
-                <div class="bg-indigo-50 rounded-lg p-4 mb-6 border-l-4 border-indigo-500">
-                    <h2 id="studentName" class="text-xl font-bold text-indigo-900"></h2>
+                <div class="bg-indigo-50 rounded-2xl p-5 mb-8 border-l-8 border-indigo-500 flex items-center shadow-sm">
+                    <div class="bg-white p-2 rounded-full mr-4 shadow-sm">
+                        <svg class="w-6 h-6 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <h2 id="studentName" class="text-xl md:text-2xl font-bold text-indigo-900"></h2>
                 </div>
                 
+                <h3 class="text-lg font-bold text-slate-700 mb-4 px-2">รายวิชาของคุณ</h3>
                 <div class="grid grid-cols-1 gap-3" id="courseList">
                     </div>
             </div>
         </div>
     </div>
-</body>
 
     <script>
+        // ให้กดปุ่ม Enter ในช่องพิมพ์รหัสแล้วค้นหาได้เลย
+        document.getElementById('studentId').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkStatus();
+            }
+        });
+
         async function checkStatus() {
             const id = document.getElementById('studentId').value;
-            const res = await fetch('data.json');
-            const data = await res.json();
-            const student = data.find(s => s.id === id);
+            if(!id) {
+                alert('กรุณากรอกรหัสนักศึกษาก่อนครับ');
+                return;
+            }
 
-            const resultDiv = document.getElementById('result');
-            const courseList = document.getElementById('courseList');
-            const nameH2 = document.getElementById('studentName');
+            try {
+                const res = await fetch('data.json');
+                const data = await res.json();
+                const student = data.find(s => s.id === id);
 
-            if (student) {
-                resultDiv.classList.remove('hidden');
-                nameH2.innerText = "ชื่อ: " + student.name;
-                courseList.innerHTML = '';
-                
-                for (const [course, status] of Object.entries(student.courses)) {
-    // แก้ตรงนี้: แปลง status เป็นตัวพิมพ์เล็กก่อน แล้วเช็คว่ามีคำว่า 'done' ไหม
-    // วิธีนี้จะรองรับทั้ง "Done", "done", "Done " (มีช่องว่าง)
-    const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
-    
-    const color = isDone ? 'text-green-600' : 'text-red-500';
-    const statusText = isDone ? 'Done' : 'Not Done'; // หรือจะใช้ status เดิมก็ได้ครับ
+                const resultDiv = document.getElementById('result');
+                const courseList = document.getElementById('courseList');
+                const nameH2 = document.getElementById('studentName');
 
-    courseList.innerHTML += `
-        <div class="flex justify-between border-b py-2 items-center">
-            <span class="text-sm text-gray-700 pr-4">${course}</span>
-            <span class="font-bold ${color} whitespace-nowrap">${status}</span>
-        </div>
-    `;
-}
-            } else {
-                alert('ไม่พบรหัสนักศึกษานี้');
-                resultDiv.classList.add('hidden');
+                if (student) {
+                    resultDiv.classList.remove('hidden');
+                    nameH2.innerText = student.name;
+                    courseList.innerHTML = '';
+                    
+                    for (const [course, status] of Object.entries(student.courses)) {
+                        // เช็คสถานะ Done หรือ Not Done
+                        const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+                        
+                        // กำหนดสีของป้ายกำกับ (Badge) ตามเงื่อนไขที่คุณขอมา
+                        const badgeColors = isDone 
+                            ? 'bg-green-100 text-green-700 border border-green-200'  // สีเขียวอ่อนเฟดๆ
+                            : 'bg-red-100 text-red-700 border border-red-200';       // สีแดงอ่อนเฟดๆ
+                            
+                        // เพิ่มไอคอนเช็คถูก หรือ กากบาท เข้าไปใน Badge ด้วย
+                        const icon = isDone 
+                            ? `<svg class="w-4 h-4 mr-1.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`
+                            : `<svg class="w-4 h-4 mr-1.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+                        courseList.innerHTML += `
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white border border-slate-200 p-4 rounded-xl hover:shadow-md hover:border-indigo-200 hover:bg-slate-50 transition-all duration-200">
+                                <span class="text-sm md:text-base font-medium text-slate-700 mb-2 sm:mb-0 pr-4">${course}</span>
+                                <span class="inline-flex items-center self-start sm:self-auto ${badgeColors} px-4 py-1.5 rounded-full text-sm font-bold shadow-sm whitespace-nowrap">
+                                    ${icon} ${status}
+                                </span>
+                            </div>
+                        `;
+                    }
+                } else {
+                    alert('ไม่พบรหัสนักศึกษานี้ในระบบครับ');
+                    resultDiv.classList.add('hidden');
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการโหลดข้อมูล (อาจจะเพราะกำลังอัปเดตไฟล์ JSON บน GitHub ให้รอสัก 1 นาทีแล้วลองใหม่ครับ)');
             }
         }
     </script>
