@@ -109,12 +109,19 @@
                 if (filterType === 'done' && !isDone) continue;
                 if (filterType === 'notdone' && isDone) continue;
 
+                // กำหนดสีพื้นหลังและสีตัวอักษรของป้ายสถานะ
                 const badge = isDone ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200';
+                
+                // เพิ่มไอคอนเครื่องหมายถูกและผิด
+                const icon = isDone 
+                    ? `<svg class="w-4 h-4 mr-1.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`
+                    : `<svg class="w-4 h-4 mr-1.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
                 courseList.innerHTML += `
                     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-white border border-slate-200 p-4 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200">
                         <span class="text-sm font-medium text-slate-700 mb-2 sm:mb-0">${course}</span>
                         <span class="inline-flex items-center self-start sm:self-auto ${badge} border px-3 py-1 rounded-full text-xs font-bold uppercase">
-                            ${status}
+                            ${icon}${status}
                         </span>
                     </div>`;
             }
