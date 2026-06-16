@@ -22,7 +22,7 @@
             <div class="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -mb-6 -ml-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
             <span class="bg-indigo-500/30 text-indigo-100 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider mb-2 inline-block backdrop-blur-sm">SET e-Learning Portal</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Status Tracker</h1>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Assignment Status</h1>
             <p class="text-indigo-100 opacity-90 text-xs md:text-sm">Academic Year 2026</p>
         </div>
         
@@ -30,7 +30,7 @@
             <div class="bg-slate-50 border border-slate-200 p-4 md:p-6 rounded-2xl shadow-inner mb-8">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Student Identification</label>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320002-6)" 
+                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320086-4)" 
                            class="border border-slate-300 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-base md:text-lg shadow-sm bg-white">
                     <button onclick="fetchAndShow()" 
                             class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base md:text-lg hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
@@ -59,7 +59,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6 mb-6">
                     <div class="relative w-32 h-32 rounded-full flex items-center justify-center shrink-0">
                         <div id="donutChart" class="absolute w-full h-full rounded-full donut-chart shadow-inner"></div>
                         <div class="absolute w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
@@ -86,12 +86,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="flex gap-1.5 bg-slate-200/70 p-1.5 rounded-xl border border-slate-300/30">
-                    <button onclick="renderCourses('all')" id="btn-all" class="flex-1 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all bg-white text-indigo-700 shadow-sm">All Tasks</button>
-                    <button onclick="renderCourses('done')" id="btn-done" class="flex-1 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all text-slate-600 hover:bg-slate-300/50">Completed</button>
-                    <button onclick="renderCourses('notdone')" id="btn-notdone" class="flex-1 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all text-slate-600 hover:bg-slate-300/50">Incomplete</button>
-                </div>
 
                 <div class="flex flex-col gap-4" id="taskListContainer"></div>
                 
@@ -104,6 +98,7 @@
 
     <script>
         let currentStudent = null;
+        let firedConfettiTasks = new Set(); // ตัวแปรเก็บประวัติการจุดพลุในแต่ละ Task
 
         const taskDictionary = {
             "Task 1": { topic: "Financial Planning", codes: ["WMD1001", "WMD1002", "WMD1003", "WMD1004", "WMD1005"] },
@@ -138,7 +133,8 @@
                 if (currentStudent) {
                     document.getElementById('result').classList.remove('hidden');
                     document.getElementById('studentName').innerText = currentStudent.name;
-                    renderCourses('all'); 
+                    firedConfettiTasks.clear(); // รีเซ็ตพลุเวลาค้นหาคนใหม่
+                    renderCourses(); 
                 } else {
                     alert('Student ID not found. Please try again.');
                     document.getElementById('result').classList.add('hidden');
@@ -146,7 +142,8 @@
             } catch (error) { alert('Error loading data.'); }
         }
 
-        function renderCourses(filterType) {
+        // เอาตัวแปร filterType ออกไปแล้ว
+        function renderCourses() {
             const container = document.getElementById('taskListContainer');
             container.innerHTML = '';
             
@@ -159,9 +156,6 @@
                 globalTotal++;
                 const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
                 if (isDone) globalDone++; else globalNotDone++;
-
-                if (filterType === 'done' && !isDone) continue;
-                if (filterType === 'notdone' && isDone) continue;
 
                 const taskName = getTaskName(course);
                 groupedTasks[taskName].total++;
@@ -188,16 +182,12 @@
             document.getElementById('statNotDone').innerText = globalNotDone;
             const percent = globalTotal === 0 ? 0 : Math.round((globalDone / globalTotal) * 100);
             
-            // อัปเดต Donut Chart (สีเขียวคือส่วนที่ทำเสร็จ สีแดงคือส่วนที่ยังไม่เสร็จ)
             setTimeout(() => {
                 document.getElementById('donutChart').style.background = `conic-gradient(#10b981 ${percent}%, #fb7185 0%)`;
                 document.getElementById('progressText').innerText = percent + '%';
             }, 100);
 
-            // อัปเดตยศ (Rank)
             updateRankBadge(percent);
-
-            updateFilterButtons(filterType);
 
             let taskIndex = 0;
             for (const [taskName, taskData] of Object.entries(groupedTasks)) {
@@ -216,9 +206,10 @@
                     headerStyle = 'bg-indigo-50/40 border-slate-200 text-slate-900';
                 }
 
+                // สังเกตว่าใน onclick ส่ง taskPercent เข้าไปในฟังก์ชัน toggleTask ด้วย
                 const accordionHtml = `
                     <div class="border border-slate-200 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-shadow duration-200">
-                        <div onclick="toggleTask('task-${taskIndex}')" class="w-full p-4 md:p-5 ${headerStyle} hover:bg-slate-50/80 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 select-none">
+                        <div onclick="toggleTask('task-${taskIndex}', ${taskPercent})" class="w-full p-4 md:p-5 ${headerStyle} hover:bg-slate-50/80 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 select-none">
                             <div class="flex-grow">
                                 <div class="flex items-baseline gap-2">
                                     <span class="font-extrabold text-base md:text-lg tracking-tight">${taskName}</span>
@@ -249,7 +240,7 @@
             }
         }
 
-        // ฟังก์ชันกำหนด ยศ (Rank) และยิงพลุ
+        // อัปเดตยศ (เอาพลุออกไปจุดตอนเปิด Task แทน)
         function updateRankBadge(percent) {
             const badge = document.getElementById('rankBadge');
             let rankName = "🌱 Starter";
@@ -261,38 +252,38 @@
             if (percent === 100) { 
                 rankName = "🏆 Master"; 
                 rankStyle = "bg-yellow-100 text-yellow-700 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]"; 
-                
-                // ยิงพลุฉลองความสำเร็จ!
-                confetti({
-                    particleCount: 150,
-                    spread: 80,
-                    origin: { y: 0.6 },
-                    colors: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
-                });
             }
 
             badge.className = `px-3 py-1 rounded-full text-xs font-bold border shadow-sm transition-all duration-500 ${rankStyle}`;
             badge.innerText = rankName;
         }
 
-        function toggleTask(id) {
+        // ฟังก์ชันเปิด/ปิด Task และ จุดพลุ!
+        function toggleTask(id, taskPercent) {
             const content = document.getElementById('content-' + id);
             const icon = document.getElementById('icon-' + id);
+            
             if (content.classList.contains('hidden')) {
+                // ตอนกด "กางออก"
                 content.classList.remove('hidden');
                 icon.style.transform = 'rotate(180deg)';
+                
+                // ถ้า Task นี้ทำเสร็จ 100% และยังไม่เคยจุดพลุมาก่อน ให้ยิงพลุ!
+                if (taskPercent === 100 && !firedConfettiTasks.has(id)) {
+                    confetti({
+                        particleCount: 80,
+                        spread: 60,
+                        origin: { y: 0.6 },
+                        colors: ['#10b981', '#3b82f6', '#f59e0b']
+                    });
+                    firedConfettiTasks.add(id); // บันทึกไว้ว่ายิงพลุให้ Task นี้ไปแล้ว (กันกดยิงรัวๆ)
+                }
+                
             } else {
+                // ตอนกด "พับเก็บ"
                 content.classList.add('hidden');
                 icon.style.transform = 'rotate(0deg)';
             }
-        }
-
-        function updateFilterButtons(active) {
-            ['all', 'done', 'notdone'].forEach(b => {
-                document.getElementById('btn-'+b).className = (b === active) 
-                ? "flex-1 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all bg-white text-indigo-700 shadow-sm"
-                : "flex-1 py-2.5 rounded-lg font-bold text-xs md:text-sm transition-all text-slate-600 hover:bg-slate-300/50";
-            });
         }
     </script>
 </body>
