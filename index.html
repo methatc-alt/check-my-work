@@ -22,7 +22,7 @@
             <div class="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -mb-6 -ml-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
             <span class="bg-indigo-500/30 text-indigo-100 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider mb-2 inline-block backdrop-blur-sm">SET e-Learning Portal</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Status Tracker</h1>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Assignment Status</h1>
             <p class="text-indigo-100 opacity-90 text-xs md:text-sm">Academic Year 2026</p>
         </div>
         
@@ -30,7 +30,7 @@
             <div class="bg-slate-50 border border-slate-200 p-4 md:p-6 rounded-2xl shadow-inner mb-8">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Student Identification</label>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320002-6)" 
+                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320086-4)" 
                            class="border border-slate-300 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-base md:text-lg shadow-sm bg-white">
                     <button onclick="fetchAndShow()" 
                             class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base md:text-lg hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
@@ -98,7 +98,8 @@
                         <h4 id="statusBlockTitle" class="font-extrabold text-base tracking-tight text-slate-800"></h4>
                         <button onclick="closeStatusBlock()" class="text-slate-400 hover:text-slate-600 text-xs font-bold uppercase tracking-wider">Close ×</button>
                     </div>
-                    <div id="statusCoursesList" class="max-h-[380px] overflow-y-auto pr-1 flex flex-col gap-2.5"></div>
+                    <div id="statusCoursesList" class="max-h-[380px] overflow-y-auto pr-1 flex flex-col gap-2.5">
+                        </div>
                 </div>
 
                 <div class="pt-2">
@@ -117,7 +118,252 @@
     <script>
         let currentStudent = null;
         let firedConfettiTasks = new Set();
-        let currentOpenStatusType = null;
+        let currentOpenStatusType = null; // ตัวแปรเช็คสถานะการเปิดค้างของกล่องรวมวิชาแยกประเภท
 
         const taskDictionary = {
-            "Task 1": { topic: "Financial Planning", codes:
+            "Task 1": { topic: "Financial Planning", codes: ["WMD1001", "WMD1002", "WMD1003", "WMD1004", "WMD1005"] },
+            "Task 2": { topic: "Financial Planning", codes: ["WMD1009", "WMD1010", "WMD1014", "WMD1015", "WMD1016", "WMD1017", "WMD1018", "WMD1024", "WMD1301"] },
+            "Task 3": { topic: "Equity Investment", codes: ["EQ201"] },
+            "Task 4": { topic: "Equity Investment", codes: ["EQD1001", "EQD1004", "EQD1101", "EQD1107", "EQD1401", "EQD1402"] },
+            "Task 5": { topic: "Derivative Investment", codes: ["DRD1201", "DRD1202", "DRD1401", "DRD1404"] },
+            "Task 6": { topic: "Mutual Fund, Debt & DR/DW Investment", codes: ["MFD1001", "PFD2002", "PFD2008", "DBD1001", "DPD1001", "DWD1001"] },
+            "Task 7": { topic: "Entrepreneurial Course", codes: ["BMD1002", "BMD1003", "BMD1004", "BMD1005", "BMD1007", "BMD1020", "EFD1001", "EFD1002", "EFD1003", "EFD1004", "EFD1005"] },
+            "Task 8": { topic: "Entrepreneurial & Alternative Assets", codes: ["ESD1002", "ESD1003", "ESD1004", "FAM1004", "FAM1005", "MKD1006", "SED1003", "SED1004", "SED1006", "ALD1001", "ALD1002"] }
+        };
+
+        function getTaskName(courseName) {
+            for (const [task, info] of Object.entries(taskDictionary)) {
+                if (info.codes.some(code => courseName.includes(code))) return task;
+            }
+            return "Other Courses";
+        }
+
+        document.getElementById('studentId').addEventListener('keypress', (e) => { if (e.key === 'Enter') fetchAndShow(); });
+
+        async function fetchAndShow() {
+            const rawInput = document.getElementById('studentId').value.trim();
+            if(!rawInput) return alert('Please enter a student ID.');
+            const normalizedInput = rawInput.replace(/-/g, '');
+
+            try {
+                const res = await fetch('data.json?t=' + new Date().getTime());
+                const data = await res.json();
+                currentStudent = data.find(s => s.id.replace(/-/g, '') === normalizedInput);
+
+                if (currentStudent) {
+                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('studentName').innerText = currentStudent.name;
+                    firedConfettiTasks.clear();
+                    closeStatusBlock(); // ปิดกล่องรวมวิชาเก่าถ้าเปิดค้างไว้ตอนค้นหาคนใหม่
+                    renderCourses(); 
+                } else {
+                    alert('Student ID not found. Please try again.');
+                    document.getElementById('result').classList.add('hidden');
+                }
+            } catch (error) { alert('Error loading data.'); }
+        }
+
+        function renderCourses() {
+            const container = document.getElementById('taskListContainer');
+            container.innerHTML = '';
+            
+            let globalTotal = 0, globalDone = 0, globalNotDone = 0;
+            const groupedTasks = {};
+            Object.keys(taskDictionary).forEach(t => groupedTasks[t] = { courses: [], total: 0, done: 0, topic: taskDictionary[t].topic });
+            groupedTasks["Other Courses"] = { courses: [], total: 0, done: 0, topic: "General Courses" };
+
+            for (const [course, status] of Object.entries(currentStudent.courses)) {
+                globalTotal++;
+                const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+                if (isDone) globalDone++; else globalNotDone++;
+
+                const taskName = getTaskName(course);
+                groupedTasks[taskName].total++;
+                if (isDone) groupedTasks[taskName].done++;
+
+                const badge = isDone ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+                const cardBg = isDone ? 'bg-white' : 'bg-slate-50/60';
+                const icon = isDone 
+                    ? `<svg class="w-4 h-4 mr-1.5 text-emerald-500 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`
+                    : `<svg class="w-4 h-4 mr-1.5 text-rose-400 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+                const courseHtml = `
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center ${cardBg} border border-slate-200/80 p-3.5 mb-2.5 rounded-xl hover:shadow-sm hover:border-slate-300 transition-all duration-150">
+                        <span class="text-xs md:text-sm font-medium text-slate-700 mb-2 sm:mb-0 pr-4">${course}</span>
+                        <span class="inline-flex items-center self-start sm:self-auto ${badge} border px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm shrink-0">
+                            ${icon}${status}
+                        </span>
+                    </div>`;
+                groupedTasks[taskName].courses.push(courseHtml);
+            }
+
+            document.getElementById('statTotal').innerText = globalTotal;
+            document.getElementById('statDone').innerText = globalDone;
+            document.getElementById('statNotDone').innerText = globalNotDone;
+            const percent = globalTotal === 0 ? 0 : Math.round((globalDone / globalTotal) * 100);
+            
+            setTimeout(() => {
+                document.getElementById('donutChart').style.background = `conic-gradient(#10b981 ${percent}%, #fb7185 0%)`;
+                document.getElementById('progressText').innerText = percent + '%';
+            }, 100);
+
+            updateRankBadge(percent);
+
+            let taskIndex = 0;
+            for (const [taskName, taskData] of Object.entries(groupedTasks)) {
+                if (taskData.courses.length === 0) continue; 
+                taskIndex++;
+                const isTaskComplete = (taskData.done === taskData.total) && (taskData.total > 0);
+                const taskPercent = taskData.total === 0 ? 0 : Math.round((taskData.done / taskData.total) * 100);
+                
+                let headerStyle = 'bg-white border-slate-200 text-slate-800';
+                let subProgressBarColor = 'bg-indigo-500';
+                
+                if (isTaskComplete) {
+                    headerStyle = 'bg-emerald-50/80 border-emerald-200 text-emerald-900';
+                    subProgressBarColor = 'bg-emerald-500';
+                } else if (taskPercent > 0) {
+                    headerStyle = 'bg-indigo-50/40 border-slate-200 text-slate-900';
+                }
+
+                const accordionHtml = `
+                    <div class="border border-slate-200 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-shadow duration-200">
+                        <div onclick="toggleTask('task-${taskIndex}', ${taskPercent})" class="w-full p-4 md:p-5 ${headerStyle} hover:bg-slate-50/80 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 select-none">
+                            <div class="flex-grow">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="font-extrabold text-base md:text-lg tracking-tight">${taskName}</span>
+                                    <span class="text-xs font-medium text-slate-400">| ${taskData.topic}</span>
+                                </div>
+                                <div class="flex items-center gap-3 mt-2 max-w-xs">
+                                    <div class="w-24 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                        <div class="${subProgressBarColor} h-full rounded-full transition-all duration-500" style="width: ${taskPercent}%"></div>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-slate-500">${taskPercent}% Done</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between md:justify-end gap-4 border-t md:border-none pt-2 md:pt-0 border-slate-100">
+                                <span class="bg-white/80 border border-slate-200/60 text-slate-600 text-xs px-2.5 py-1 rounded-lg font-bold shadow-sm">
+                                    ${taskData.done}/${taskData.total} Passed
+                                </span>
+                                <svg id="icon-task-${taskIndex}" class="w-5 h-5 text-slate-400 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        <div id="content-task-${taskIndex}" class="hidden bg-slate-50 p-4 border-t border-slate-100">
+                            <div class="max-h-[350px] overflow-y-auto pr-1">
+                                ${taskData.courses.join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += accordionHtml;
+            }
+        }
+
+        // NEW: ฟังก์ชันประมวลผลและเปิด/ปิดบล็อกวิชาตามสถานะที่ถูกคลิก (Done / Not Done)
+        function toggleStatusBlock(type) {
+            const block = document.getElementById('statusCoursesBlock');
+            const listContainer = document.getElementById('statusCoursesList');
+            const title = document.getElementById('statusBlockTitle');
+            const arrowDone = document.getElementById('arrow-status-done');
+            const arrowNotDone = document.getElementById('arrow-status-notdone');
+
+            // ถ้ากดย้ำกล่องเดิม ให้ทำการปิดตัวลงมา
+            if (currentOpenStatusType === type) {
+                closeStatusBlock();
+                return;
+            }
+
+            currentOpenStatusType = type;
+            listContainer.innerHTML = '';
+            block.classList.remove('hidden');
+
+            // หมุนลูกศรชี้ขึ้นตรงอันที่เลือก และเคลียร์อันอื่น
+            if(type === 'done') {
+                arrowDone.style.transform = 'rotate(180deg)';
+                arrowNotDone.style.transform = 'rotate(0deg)';
+                title.innerHTML = `<span class="text-emerald-600">🏆 All Completed Courses</span> วิชาที่เรียนสำเร็จแล้ว`;
+            } else {
+                arrowNotDone.style.transform = 'rotate(180deg)';
+                arrowDone.style.transform = 'rotate(0deg)';
+                title.innerHTML = `<span class="text-rose-500">⏳ All Incomplete Courses</span> วิชาที่ยังไม่สำเร็จ`;
+            }
+
+            // ค้นหาวิกาแบบเรียงเดี่ยว ไม่สน Task
+            for (const [course, status] of Object.entries(currentStudent.courses)) {
+                const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+                
+                // กรองวิชาตามเงื่อนไขกล่องที่กด
+                if (type === 'done' && !isDone) continue;
+                if (type === 'notdone' && isDone) continue;
+
+                const badge = isDone ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+                const cardBg = isDone ? 'bg-white' : 'bg-slate-50/60';
+                const icon = isDone 
+                    ? `<svg class="w-4 h-4 mr-1.5 text-emerald-500 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`
+                    : `<svg class="w-4 h-4 mr-1.5 text-rose-400 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+                const courseHtml = `
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center ${cardBg} border border-slate-200 p-3 rounded-xl hover:shadow-sm transition-all">
+                        <span class="text-xs md:text-sm font-medium text-slate-700 mb-1 sm:mb-0">${course}</span>
+                        <span class="inline-flex items-center self-start sm:self-auto ${badge} border px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0">
+                            ${icon}${status}
+                        </span>
+                    </div>`;
+                listContainer.innerHTML += courseHtml;
+            }
+
+            if(listContainer.innerHTML === '') {
+                listContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">No courses found in this section.</p>`;
+            }
+        }
+
+        // NEW: ฟังก์ชันสั่งปิดบล็อกวิชาแยกประเภท
+        function closeStatusBlock() {
+            document.getElementById('statusCoursesBlock').classLinc = document.getElementById('statusCoursesBlock').classList.add('hidden');
+            document.getElementById('arrow-status-done').style.transform = 'rotate(0deg)';
+            document.getElementById('arrow-status-notdone').style.transform = 'rotate(0deg)';
+            currentOpenStatusType = null;
+        }
+
+        function updateRankBadge(percent) {
+            const badge = document.getElementById('rankBadge');
+            let rankName = "🌱 Starter";
+            let rankStyle = "bg-slate-100 text-slate-600 border-slate-300";
+
+            if (percent > 25) { rankName = "🚀 Rising Star"; rankStyle = "bg-blue-100 text-blue-700 border-blue-300"; }
+            if (percent > 50) { rankName = "🔥 Pro Learner"; rankStyle = "bg-orange-100 text-orange-700 border-orange-300"; }
+            if (percent > 75) { rankName = "💎 Elite"; rankStyle = "bg-purple-100 text-purple-700 border-purple-300"; }
+            if (percent === 100) { 
+                rankName = "🏆 Master"; 
+                rankStyle = "bg-yellow-100 text-yellow-700 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]"; 
+            }
+
+            badge.className = `px-3 py-1 rounded-full text-xs font-bold border shadow-sm transition-all duration-500 ${rankStyle}`;
+            badge.innerText = rankName;
+        }
+
+        function toggleTask(id, taskPercent) {
+            const content = document.getElementById('content-' + id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+                
+                if (taskPercent === 100 && !firedConfettiTasks.has(id)) {
+                    confetti({
+                        particleCount: 80,
+                        spread: 60,
+                        origin: { y: 0.6 },
+                        colors: ['#10b981', '#3b82f6', '#f59e0b']
+                    });
+                    firedConfettiTasks.add(id);
+                }
+            } else {
+                content.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+    </script>
+</body>
+</html>
