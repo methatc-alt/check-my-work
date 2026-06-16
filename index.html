@@ -6,29 +6,34 @@
     <title>E-Learning Status Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Prompt', sans-serif; }
+        .donut-chart {
+            background: conic-gradient(#10b981 0%, #fb7185 0%);
+            transition: background 1s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen p-4 md:p-10 text-slate-800">
-    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden transition-all duration-300">
+    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
         
         <div class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-500 p-8 md:p-12 text-center relative overflow-hidden">
             <div class="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -mb-6 -ml-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
             <span class="bg-indigo-500/30 text-indigo-100 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider mb-2 inline-block backdrop-blur-sm">SET e-Learning Portal</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">E-Learning Status Tracker</h1>
-            <p class="text-indigo-100 opacity-90 text-xs md:text-sm">Academic Year 2026 | Monitor your learning tasks with ease</p>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Status Tracker</h1>
+            <p class="text-indigo-100 opacity-90 text-xs md:text-sm">Academic Year 2026</p>
         </div>
         
         <div class="p-6 md:p-10">
             <div class="bg-slate-50 border border-slate-200 p-4 md:p-6 rounded-2xl shadow-inner mb-8">
-                <label for="studentId" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Student Identification</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Student Identification</label>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g., 673320002-6)" 
+                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320002-6)" 
                            class="border border-slate-300 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-base md:text-lg shadow-sm bg-white">
                     <button onclick="fetchAndShow()" 
-                            class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base md:text-lg hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200 shadow-md shadow-indigo-200 flex items-center justify-center gap-2">
+                            class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base md:text-lg hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                         Search
                     </button>
@@ -36,33 +41,49 @@
             </div>
 
             <div id="result" class="hidden space-y-6">
-                <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-5 text-white flex items-center shadow-lg">
-                    <div class="bg-slate-700/50 p-3 rounded-xl mr-4 border border-slate-600">
-                        <svg class="w-6 h-6 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl p-5 text-white flex justify-between items-center shadow-lg">
+                    <div class="flex items-center">
+                        <div class="bg-slate-700/50 p-3 rounded-xl mr-4 border border-slate-600">
+                            <svg class="w-6 h-6 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 font-medium">Student Name</p>
+                            <h2 id="studentName" class="text-xl md:text-2xl font-bold tracking-tight"></h2>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-xs text-slate-400 font-medium">Student Account</p>
-                        <h2 id="studentName" class="text-xl md:text-2xl font-bold tracking-tight"></h2>
+                    <div class="text-center hidden sm:block">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Current Rank</p>
+                        <span id="rankBadge" class="px-3 py-1 rounded-full text-sm font-bold bg-slate-700 text-white border border-slate-500 shadow-sm">
+                            -
+                        </span>
                     </div>
                 </div>
 
-                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-2 h-full bg-indigo-600"></div>
-                    <div class="flex justify-between items-end mb-3">
-                        <div>
-                            <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Overall Progress</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Summary of all registered courses</p>
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
+                    <div class="relative w-32 h-32 rounded-full flex items-center justify-center shrink-0">
+                        <div id="donutChart" class="absolute w-full h-full rounded-full donut-chart shadow-inner"></div>
+                        <div class="absolute w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
+                            <span class="text-2xl font-black text-slate-800" id="progressText">0%</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Done</span>
                         </div>
-                        <span class="text-3xl font-black text-indigo-600 tracking-tight" id="progressText">0%</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-full h-4 mb-5 overflow-hidden p-0.5 border border-slate-200">
-                        <div id="progressBar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                    
-                    <div class="grid grid-cols-3 gap-2 text-center bg-slate-50 rounded-xl p-3 border border-slate-100">
-                        <div><div class="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Total</div><div class="text-lg font-bold text-slate-700" id="statTotal">0</div></div>
-                        <div><div class="text-[10px] uppercase font-bold text-emerald-500 mb-0.5">Completed</div><div class="text-lg font-bold text-emerald-600" id="statDone">0</div></div>
-                        <div><div class="text-[10px] uppercase font-bold text-rose-400 mb-0.5">Incomplete</div><div class="text-lg font-bold text-rose-500" id="statNotDone">0</div></div>
+
+                    <div class="flex-grow w-full">
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 text-center md:text-left">Learning Overview</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                                <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Tasks</div>
+                                <div class="text-xl font-black text-slate-700" id="statTotal">0</div>
+                            </div>
+                            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-center shadow-sm">
+                                <div class="text-[10px] uppercase font-bold text-emerald-600 mb-1">Completed</div>
+                                <div class="text-xl font-black text-emerald-600" id="statDone">0</div>
+                            </div>
+                            <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 text-center shadow-sm">
+                                <div class="text-[10px] uppercase font-bold text-rose-500 mb-1">Incomplete</div>
+                                <div class="text-xl font-black text-rose-600" id="statNotDone">0</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -84,7 +105,6 @@
     <script>
         let currentStudent = null;
 
-        // --- พิกัดข้อมูลเนื้อหาแต่ละ Task อัปเดตวิชาตามสเปกและใส่หัวข้อวิชา ---
         const taskDictionary = {
             "Task 1": { topic: "Financial Planning", codes: ["WMD1001", "WMD1002", "WMD1003", "WMD1004", "WMD1005"] },
             "Task 2": { topic: "Financial Planning", codes: ["WMD1009", "WMD1010", "WMD1014", "WMD1015", "WMD1016", "WMD1017", "WMD1018", "WMD1024", "WMD1301"] },
@@ -108,13 +128,11 @@
         async function fetchAndShow() {
             const rawInput = document.getElementById('studentId').value.trim();
             if(!rawInput) return alert('Please enter a student ID.');
-
             const normalizedInput = rawInput.replace(/-/g, '');
 
             try {
                 const res = await fetch('data.json?t=' + new Date().getTime());
                 const data = await res.json();
-                
                 currentStudent = data.find(s => s.id.replace(/-/g, '') === normalizedInput);
 
                 if (currentStudent) {
@@ -125,7 +143,7 @@
                     alert('Student ID not found. Please try again.');
                     document.getElementById('result').classList.add('hidden');
                 }
-            } catch (error) { alert('Error loading data. Make sure data.json exists and is structured correctly.'); }
+            } catch (error) { alert('Error loading data.'); }
         }
 
         function renderCourses(filterType) {
@@ -133,7 +151,6 @@
             container.innerHTML = '';
             
             let globalTotal = 0, globalDone = 0, globalNotDone = 0;
-            
             const groupedTasks = {};
             Object.keys(taskDictionary).forEach(t => groupedTasks[t] = { courses: [], total: 0, done: 0, topic: taskDictionary[t].topic });
             groupedTasks["Other Courses"] = { courses: [], total: 0, done: 0, topic: "General Courses" };
@@ -163,31 +180,32 @@
                             ${icon}${status}
                         </span>
                     </div>`;
-                    
                 groupedTasks[taskName].courses.push(courseHtml);
             }
 
-            // อัปเดตข้อมูลรวมแถบด้านบน
             document.getElementById('statTotal').innerText = globalTotal;
             document.getElementById('statDone').innerText = globalDone;
             document.getElementById('statNotDone').innerText = globalNotDone;
             const percent = globalTotal === 0 ? 0 : Math.round((globalDone / globalTotal) * 100);
+            
+            // อัปเดต Donut Chart (สีเขียวคือส่วนที่ทำเสร็จ สีแดงคือส่วนที่ยังไม่เสร็จ)
             setTimeout(() => {
-                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('donutChart').style.background = `conic-gradient(#10b981 ${percent}%, #fb7185 0%)`;
                 document.getElementById('progressText').innerText = percent + '%';
             }, 100);
+
+            // อัปเดตยศ (Rank)
+            updateRankBadge(percent);
+
             updateFilterButtons(filterType);
 
-            // เจนเนอเรตกล่อง Accordion พร้อม แถบเปอร์เซ็นต์ย่อย (Mini Progress Bar)
             let taskIndex = 0;
             for (const [taskName, taskData] of Object.entries(groupedTasks)) {
                 if (taskData.courses.length === 0) continue; 
-
                 taskIndex++;
                 const isTaskComplete = (taskData.done === taskData.total) && (taskData.total > 0);
                 const taskPercent = taskData.total === 0 ? 0 : Math.round((taskData.done / taskData.total) * 100);
                 
-                // สลับสีหัวข้อตามเปอร์เซ็นต์ความคืบหน้า
                 let headerStyle = 'bg-white border-slate-200 text-slate-800';
                 let subProgressBarColor = 'bg-indigo-500';
                 
@@ -213,7 +231,6 @@
                                     <span class="text-[11px] font-bold text-slate-500">${taskPercent}% Done</span>
                                 </div>
                             </div>
-                            
                             <div class="flex items-center justify-between md:justify-end gap-4 border-t md:border-none pt-2 md:pt-0 border-slate-100">
                                 <span class="bg-white/80 border border-slate-200/60 text-slate-600 text-xs px-2.5 py-1 rounded-lg font-bold shadow-sm">
                                     ${taskData.done}/${taskData.total} Passed
@@ -221,7 +238,6 @@
                                 <svg id="icon-task-${taskIndex}" class="w-5 h-5 text-slate-400 transition-transform duration-300 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
                             </div>
                         </div>
-                        
                         <div id="content-task-${taskIndex}" class="hidden bg-slate-50 p-4 border-t border-slate-100">
                             <div class="max-h-[350px] overflow-y-auto pr-1">
                                 ${taskData.courses.join('')}
@@ -231,6 +247,32 @@
                 `;
                 container.innerHTML += accordionHtml;
             }
+        }
+
+        // ฟังก์ชันกำหนด ยศ (Rank) และยิงพลุ
+        function updateRankBadge(percent) {
+            const badge = document.getElementById('rankBadge');
+            let rankName = "🌱 Starter";
+            let rankStyle = "bg-slate-100 text-slate-600 border-slate-300";
+
+            if (percent > 25) { rankName = "🚀 Rising Star"; rankStyle = "bg-blue-100 text-blue-700 border-blue-300"; }
+            if (percent > 50) { rankName = "🔥 Pro Learner"; rankStyle = "bg-orange-100 text-orange-700 border-orange-300"; }
+            if (percent > 75) { rankName = "💎 Elite"; rankStyle = "bg-purple-100 text-purple-700 border-purple-300"; }
+            if (percent === 100) { 
+                rankName = "🏆 Master"; 
+                rankStyle = "bg-yellow-100 text-yellow-700 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.5)]"; 
+                
+                // ยิงพลุฉลองความสำเร็จ!
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
+                });
+            }
+
+            badge.className = `px-3 py-1 rounded-full text-xs font-bold border shadow-sm transition-all duration-500 ${rankStyle}`;
+            badge.innerText = rankName;
         }
 
         function toggleTask(id) {
