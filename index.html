@@ -22,7 +22,7 @@
             <div class="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -mb-6 -ml-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
             <span class="bg-indigo-500/30 text-indigo-100 text-xs px-3 py-1 rounded-full font-semibold uppercase tracking-wider mb-2 inline-block backdrop-blur-sm">SET e-Learning Portal</span>
-            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Assignment Status</h1>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-white mb-2 tracking-tight">Status Tracker</h1>
             <p class="text-indigo-100 opacity-90 text-xs md:text-sm">Academic Year 2026</p>
         </div>
         
@@ -30,7 +30,7 @@
             <div class="bg-slate-50 border border-slate-200 p-4 md:p-6 rounded-2xl shadow-inner mb-8">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Student Identification</label>
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320086-4)" 
+                    <input type="text" id="studentId" placeholder="Enter Student ID (e.g. 673320002-6)" 
                            class="border border-slate-300 p-4 flex-grow rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all text-base md:text-lg shadow-sm bg-white">
                     <button onclick="fetchAndShow()" 
                             class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold text-base md:text-lg hover:bg-indigo-700 hover:shadow-lg active:scale-95 transition-all duration-200 flex items-center justify-center gap-2">
@@ -59,7 +59,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6 mb-6">
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
                     <div class="relative w-32 h-32 rounded-full flex items-center justify-center shrink-0">
                         <div id="donutChart" class="absolute w-full h-full rounded-full donut-chart shadow-inner"></div>
                         <div class="absolute w-24 h-24 bg-white rounded-full flex flex-col items-center justify-center shadow-sm">
@@ -69,22 +69,41 @@
                     </div>
 
                     <div class="flex-grow w-full">
-                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 text-center md:text-left">Learning Overview</h3>
+                        <h3 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 text-center md:text-left">Learning Overview <span class="text-xs font-normal text-slate-400 lowercase">(click cards to view courses)</span></h3>
                         <div class="grid grid-cols-3 gap-3">
                             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
                                 <div class="text-[10px] uppercase font-bold text-slate-400 mb-1">Total Tasks</div>
                                 <div class="text-xl font-black text-slate-700" id="statTotal">0</div>
                             </div>
-                            <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-center shadow-sm">
-                                <div class="text-[10px] uppercase font-bold text-emerald-600 mb-1">Completed</div>
+                            <div onclick="toggleStatusBlock('done')" class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-center shadow-sm cursor-pointer hover:bg-emerald-100/50 hover:border-emerald-300 transition-all active:scale-95 select-none">
+                                <div class="text-[10px] uppercase font-bold text-emerald-600 mb-1 flex items-center justify-center gap-1">
+                                    Completed
+                                    <svg id="arrow-status-done" class="w-3 w-3 text-emerald-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
                                 <div class="text-xl font-black text-emerald-600" id="statDone">0</div>
                             </div>
-                            <div class="bg-rose-50 p-3 rounded-xl border border-rose-100 text-center shadow-sm">
-                                <div class="text-[10px] uppercase font-bold text-rose-500 mb-1">Incomplete</div>
+                            <div onclick="toggleStatusBlock('notdone')" class="bg-rose-50 p-3 rounded-xl border border-rose-100 text-center shadow-sm cursor-pointer hover:bg-rose-100/50 hover:border-rose-300 transition-all active:scale-95 select-none">
+                                <div class="text-[10px] uppercase font-bold text-rose-500 mb-1 flex items-center justify-center gap-1">
+                                    Incomplete
+                                    <svg id="arrow-status-notdone" class="w-3 w-3 text-rose-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
                                 <div class="text-xl font-black text-rose-600" id="statNotDone">0</div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div id="statusCoursesBlock" class="hidden bg-white border border-slate-200 rounded-2xl p-5 shadow-sm transition-all">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <h4 id="statusBlockTitle" class="font-extrabold text-base tracking-tight text-slate-800"></h4>
+                        <button onclick="closeStatusBlock()" class="text-slate-400 hover:text-slate-600 text-xs font-bold uppercase tracking-wider">Close ×</button>
+                    </div>
+                    <div id="statusCoursesList" class="max-h-[380px] overflow-y-auto pr-1 flex flex-col gap-2.5">
+                        </div>
+                </div>
+
+                <div class="pt-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Structure Tasks (1-8)</h3>
                 </div>
 
                 <div class="flex flex-col gap-4" id="taskListContainer"></div>
@@ -98,7 +117,8 @@
 
     <script>
         let currentStudent = null;
-        let firedConfettiTasks = new Set(); // ตัวแปรเก็บประวัติการจุดพลุในแต่ละ Task
+        let firedConfettiTasks = new Set();
+        let currentOpenStatusType = null; // ตัวแปรเช็คสถานะการเปิดค้างของกล่องรวมวิชาแยกประเภท
 
         const taskDictionary = {
             "Task 1": { topic: "Financial Planning", codes: ["WMD1001", "WMD1002", "WMD1003", "WMD1004", "WMD1005"] },
@@ -133,7 +153,8 @@
                 if (currentStudent) {
                     document.getElementById('result').classList.remove('hidden');
                     document.getElementById('studentName').innerText = currentStudent.name;
-                    firedConfettiTasks.clear(); // รีเซ็ตพลุเวลาค้นหาคนใหม่
+                    firedConfettiTasks.clear();
+                    closeStatusBlock(); // ปิดกล่องรวมวิชาเก่าถ้าเปิดค้างไว้ตอนค้นหาคนใหม่
                     renderCourses(); 
                 } else {
                     alert('Student ID not found. Please try again.');
@@ -142,7 +163,6 @@
             } catch (error) { alert('Error loading data.'); }
         }
 
-        // เอาตัวแปร filterType ออกไปแล้ว
         function renderCourses() {
             const container = document.getElementById('taskListContainer');
             container.innerHTML = '';
@@ -206,7 +226,6 @@
                     headerStyle = 'bg-indigo-50/40 border-slate-200 text-slate-900';
                 }
 
-                // สังเกตว่าใน onclick ส่ง taskPercent เข้าไปในฟังก์ชัน toggleTask ด้วย
                 const accordionHtml = `
                     <div class="border border-slate-200 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-shadow duration-200">
                         <div onclick="toggleTask('task-${taskIndex}', ${taskPercent})" class="w-full p-4 md:p-5 ${headerStyle} hover:bg-slate-50/80 cursor-pointer transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 select-none">
@@ -240,7 +259,72 @@
             }
         }
 
-        // อัปเดตยศ (เอาพลุออกไปจุดตอนเปิด Task แทน)
+        // NEW: ฟังก์ชันประมวลผลและเปิด/ปิดบล็อกวิชาตามสถานะที่ถูกคลิก (Done / Not Done)
+        function toggleStatusBlock(type) {
+            const block = document.getElementById('statusCoursesBlock');
+            const listContainer = document.getElementById('statusCoursesList');
+            const title = document.getElementById('statusBlockTitle');
+            const arrowDone = document.getElementById('arrow-status-done');
+            const arrowNotDone = document.getElementById('arrow-status-notdone');
+
+            // ถ้ากดย้ำกล่องเดิม ให้ทำการปิดตัวลงมา
+            if (currentOpenStatusType === type) {
+                closeStatusBlock();
+                return;
+            }
+
+            currentOpenStatusType = type;
+            listContainer.innerHTML = '';
+            block.classList.remove('hidden');
+
+            // หมุนลูกศรชี้ขึ้นตรงอันที่เลือก และเคลียร์อันอื่น
+            if(type === 'done') {
+                arrowDone.style.transform = 'rotate(180deg)';
+                arrowNotDone.style.transform = 'rotate(0deg)';
+                title.innerHTML = `<span class="text-emerald-600">🏆 All Completed Courses</span> วิชาที่เรียนสำเร็จแล้ว`;
+            } else {
+                arrowNotDone.style.transform = 'rotate(180deg)';
+                arrowDone.style.transform = 'rotate(0deg)';
+                title.innerHTML = `<span class="text-rose-500">⏳ All Incomplete Courses</span> วิชาที่ยังไม่สำเร็จ`;
+            }
+
+            // ค้นหาวิกาแบบเรียงเดี่ยว ไม่สน Task
+            for (const [course, status] of Object.entries(currentStudent.courses)) {
+                const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+                
+                // กรองวิชาตามเงื่อนไขกล่องที่กด
+                if (type === 'done' && !isDone) continue;
+                if (type === 'notdone' && isDone) continue;
+
+                const badge = isDone ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+                const cardBg = isDone ? 'bg-white' : 'bg-slate-50/60';
+                const icon = isDone 
+                    ? `<svg class="w-4 h-4 mr-1.5 text-emerald-500 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`
+                    : `<svg class="w-4 h-4 mr-1.5 text-rose-400 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+                const courseHtml = `
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center ${cardBg} border border-slate-200 p-3 rounded-xl hover:shadow-sm transition-all">
+                        <span class="text-xs md:text-sm font-medium text-slate-700 mb-1 sm:mb-0">${course}</span>
+                        <span class="inline-flex items-center self-start sm:self-auto ${badge} border px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider shrink-0">
+                            ${icon}${status}
+                        </span>
+                    </div>`;
+                listContainer.innerHTML += courseHtml;
+            }
+
+            if(listContainer.innerHTML === '') {
+                listContainer.innerHTML = `<p class="text-slate-400 text-xs text-center py-4">No courses found in this section.</p>`;
+            }
+        }
+
+        // NEW: ฟังก์ชันสั่งปิดบล็อกวิชาแยกประเภท
+        function closeStatusBlock() {
+            document.getElementById('statusCoursesBlock').classLinc = document.getElementById('statusCoursesBlock').classList.add('hidden');
+            document.getElementById('arrow-status-done').style.transform = 'rotate(0deg)';
+            document.getElementById('arrow-status-notdone').style.transform = 'rotate(0deg)';
+            currentOpenStatusType = null;
+        }
+
         function updateRankBadge(percent) {
             const badge = document.getElementById('rankBadge');
             let rankName = "🌱 Starter";
@@ -258,17 +342,14 @@
             badge.innerText = rankName;
         }
 
-        // ฟังก์ชันเปิด/ปิด Task และ จุดพลุ!
         function toggleTask(id, taskPercent) {
             const content = document.getElementById('content-' + id);
             const icon = document.getElementById('icon-' + id);
             
             if (content.classList.contains('hidden')) {
-                // ตอนกด "กางออก"
                 content.classList.remove('hidden');
                 icon.style.transform = 'rotate(180deg)';
                 
-                // ถ้า Task นี้ทำเสร็จ 100% และยังไม่เคยจุดพลุมาก่อน ให้ยิงพลุ!
                 if (taskPercent === 100 && !firedConfettiTasks.has(id)) {
                     confetti({
                         particleCount: 80,
@@ -276,11 +357,9 @@
                         origin: { y: 0.6 },
                         colors: ['#10b981', '#3b82f6', '#f59e0b']
                     });
-                    firedConfettiTasks.add(id); // บันทึกไว้ว่ายิงพลุให้ Task นี้ไปแล้ว (กันกดยิงรัวๆ)
+                    firedConfettiTasks.add(id);
                 }
-                
             } else {
-                // ตอนกด "พับเก็บ"
                 content.classList.add('hidden');
                 icon.style.transform = 'rotate(0deg)';
             }
