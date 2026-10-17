@@ -103,59 +103,152 @@
                 </div>
 
                 <div class="pt-2">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Structure Tasks (1-8)</h3>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Structure Tasks</h3>
                 </div>
 
                 <div class="flex flex-col gap-4" id="taskListContainer"></div>
                 
                 <div class="border-t border-slate-100 pt-6 mt-8">
-                    <p class="text-center text-slate-400 text-xs">System Status: Active | Last updated: May 2026</p>
+                    <p class="text-center text-slate-400 text-xs">System Status: Active | Data updates automatically from Google Sheets</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // =====================================================================
+        //  ตั้งค่าครั้งเดียว: วางลิงก์ Google Sheet ตรงนี้ (ต้องแชร์แบบ "ทุกคนที่มีลิงก์ดูได้")
+        //  ถ้าเว้นว่างไว้ เว็บจะอ่านจาก data.json แบบเดิม
+        // =====================================================================
+        const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1_Raw0wHWBngzQoks30RNWFBISe1O5IyOE7SKK0-_Dxk/edit";
+        const STUDENTS_TAB = "Students";
+        const COURSES_TAB  = "Courses";
+        // =====================================================================
+
         let currentStudent = null;
         let firedConfettiTasks = new Set();
-        let currentOpenStatusType = null; // ตัวแปรเช็คสถานะการเปิดค้างของกล่องรวมวิชาแยกประเภท
+        let currentOpenStatusType = null;
 
-        const taskDictionary = {
-            "Task 1": { topic: "Financial Planning", codes: ["WMD1001", "WMD1002", "WMD1003", "WMD1004", "WMD1005"] },
-            "Task 2": { topic: "Financial Planning", codes: ["WMD1009", "WMD1010", "WMD1014", "WMD1015", "WMD1016", "WMD1017", "WMD1018", "WMD1024", "WMD1301"] },
-            "Task 3": { topic: "Equity Investment", codes: ["EQ201"] },
-            "Task 4": { topic: "Equity Investment", codes: ["EQD1001", "EQD1004", "EQD1101", "EQD1107", "EQD1401", "EQD1402"] },
-            "Task 5": { topic: "Derivative Investment", codes: ["DRD1201", "DRD1202", "DRD1401", "DRD1404"] },
-            "Task 6": { topic: "Mutual Fund, Debt & DR/DW Investment", codes: ["MFD1001", "PFD2002", "PFD2008", "DBD1001", "DPD1001", "DWD1001"] },
-            "Task 7": { topic: "Entrepreneurial Course", codes: ["BMD1002", "BMD1003", "BMD1004", "BMD1005", "BMD1007", "BMD1020", "EFD1001", "EFD1002", "EFD1003", "EFD1004", "EFD1005"] },
-            "Task 8": { topic: "Entrepreneurial & Alternative Assets", codes: ["ESD1002", "ESD1003", "ESD1004", "FAM1004", "FAM1005", "MKD1006", "SED1003", "SED1004", "SED1006", "ALD1001", "ALD1002"] }
+        // ค่าเริ่มต้น (ใช้เมื่อยังไม่ได้ต่อ Google Sheet) — ถ้าต่อแล้วจะใช้แท็บ Courses แทน
+        let taskDictionary = {
+            "Task 1": { topic: "Financial Planning", duration: "29 Jun - 12 Jul 2026", codes: ["WMD1001", "WMD1002", "WMD1003", "WMD1004"] },
+            "Task 2": { topic: "Financial Planning", duration: "13 - 26 Jul 2026", codes: ["WMD1009", "WMD1010", "WMD1014", "WMD1015", "WMD1016", "WMD1017", "WMD1018", "WMD1024", "WMD1301"] },
+            "Task 3": { topic: "Equity Investment", duration: "27 Jul - 9 Aug 2026", codes: ["EQ201"] },
+            "Task 4": { topic: "Equity Investment", duration: "10 - 23 Aug 2026", codes: ["EQD1004", "EQD1101", "EQD1107", "EQD1401", "EQD1402"] },
+            "Task 5": { topic: "Derivative Investment", duration: "24 Aug - 6 Sep 2026", codes: ["DRD1201", "DRD1202", "DRD1401", "DRD1404"] },
+            "Task 6": { topic: "Mutual Fund, Debt & DR/DW Investment", duration: "7 - 20 Sep 2026", codes: ["MFD1001", "PFD2002", "PFD2008", "DBD1001", "DPD1001", "DWD1001"] },
+            "Task 7": { topic: "Entrepreneurial Course", duration: "21 Sep - 4 Oct 2026", codes: ["BMD1002", "BMD1003", "BMD1004", "BMD1005", "BMD1007", "BMD1020", "EFD1001", "EFD1002", "EFD1003", "EFD1004", "EFD1005"] },
+            "Task 8": { topic: "Entrepreneurial & Alternative Assets", duration: "5 - 18 Oct 2026", codes: ["ESD1002", "ESD1003", "ESD1004", "FAM1004", "FAM1005", "MKD1006", "SED1003", "SED1004", "SED1006", "ALD1001", "ALD1002"] }
         };
+        let courseNames = {}; // code -> ชื่อคอร์ส (จากแท็บ Courses)
+
+        const CODE_RE = /[A-Z]{2,4}\d{3,4}/;
 
         function getTaskName(courseName) {
+            const m = courseName.toUpperCase().match(CODE_RE);
+            const code = m ? m[0] : courseName;
             for (const [task, info] of Object.entries(taskDictionary)) {
-                if (info.codes.some(code => courseName.includes(code))) return task;
+                if (info.codes.includes(code)) return task;
             }
             return "Other Courses";
+        }
+
+        // ---------- อ่าน CSV ----------
+        function parseCSV(text) {
+            const rows = []; let row = [], cell = '', q = false;
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (q) {
+                    if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+                    else cell += ch;
+                } else if (ch === '"') q = true;
+                else if (ch === ',') { row.push(cell); cell = ''; }
+                else if (ch === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+                else if (ch !== '\r') cell += ch;
+            }
+            if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+            return rows.map(r => r.map(c => c.trim()));
+        }
+
+        function sheetCsvUrl(tab) {
+            const m = GOOGLE_SHEET_URL.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            const id = m ? m[1] : GOOGLE_SHEET_URL.trim();
+            return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}&t=${Date.now()}`;
+        }
+
+        async function fetchCsv(tab) {
+            const res = await fetch(sheetCsvUrl(tab));
+            if (!res.ok) throw new Error('sheet');
+            return parseCSV(await res.text());
+        }
+
+        // แท็บ Courses: Task | Topic | Duration | Code | CourseName | Minutes
+        function loadCourses(rows) {
+            const dict = {}; courseNames = {};
+            for (const r of rows.slice(1)) {
+                const [task, topic, duration, code, name] = r;
+                if (!task || !code) continue;
+                const c = code.toUpperCase().trim();
+                if (!dict[task]) dict[task] = { topic: topic || '', duration: duration || '', codes: [] };
+                dict[task].codes.push(c);
+                courseNames[c] = name || '';
+            }
+            if (Object.keys(dict).length) taskDictionary = dict;
+        }
+
+        // แท็บ Students: StudentID | Name | <รหัสคอร์ส> ... (หัวคอลัมน์มีชื่อคอร์สต่อท้ายได้)
+        function rowsToStudents(rows) {
+            const header = rows[0] || [];
+            return rows.slice(1).filter(r => r[0]).map(r => {
+                const courses = {};
+                for (let i = 2; i < header.length; i++) {
+                    if (!header[i]) continue;
+                    const m = header[i].toUpperCase().match(CODE_RE);
+                    const code = m ? m[0] : header[i];
+                    const label = courseNames[code] ? `${code} ${courseNames[code]}` : header[i];
+                    courses[label] = r[i] || 'Not Done';
+                }
+                return { id: r[0], name: r[1] || '', courses };
+            });
+        }
+
+        let cachedStudents = null;
+        async function loadStudents() {
+            if (!GOOGLE_SHEET_URL.trim()) {
+                const res = await fetch('data.json?t=' + Date.now());
+                return await res.json();
+            }
+            const [courseRows, studentRows] = await Promise.all([
+                fetchCsv(COURSES_TAB).catch(() => []),
+                fetchCsv(STUDENTS_TAB)
+            ]);
+            loadCourses(courseRows);
+            return rowsToStudents(studentRows);
+        }
+
+        function isDoneStatus(status) {
+            const s = String(status || '').toLowerCase().trim();
+            if (!s || s.includes('not') || s.includes('ไม่')) return false;
+            return s.includes('done') || s === 'true' || s === '✓' || s === '/' || s.includes('ผ่าน') || s.includes('เสร็จ');
         }
 
         document.getElementById('studentId').addEventListener('keypress', (e) => { if (e.key === 'Enter') fetchAndShow(); });
 
         async function fetchAndShow() {
             const rawInput = document.getElementById('studentId').value.trim();
-            if(!rawInput) return alert('Please enter a student ID.');
-            const normalizedInput = rawInput.replace(/-/g, '');
+            if (!rawInput) return alert('Please enter a student ID.');
+            const normalizedInput = rawInput.replace(/[-\s]/g, '');
 
             try {
-                const res = await fetch('data.json?t=' + new Date().getTime());
-                const data = await res.json();
-                currentStudent = data.find(s => s.id.replace(/-/g, '') === normalizedInput);
+                const data = await loadStudents();
+                currentStudent = data.find(s => String(s.id).replace(/[-\s]/g, '') === normalizedInput);
 
                 if (currentStudent) {
                     document.getElementById('result').classList.remove('hidden');
                     document.getElementById('studentName').innerText = currentStudent.name;
                     firedConfettiTasks.clear();
-                    closeStatusBlock(); // ปิดกล่องรวมวิชาเก่าถ้าเปิดค้างไว้ตอนค้นหาคนใหม่
-                    renderCourses(); 
+                    closeStatusBlock();
+                    renderCourses();
                 } else {
                     alert('Student ID not found. Please try again.');
                     document.getElementById('result').classList.add('hidden');
@@ -169,12 +262,12 @@
             
             let globalTotal = 0, globalDone = 0, globalNotDone = 0;
             const groupedTasks = {};
-            Object.keys(taskDictionary).forEach(t => groupedTasks[t] = { courses: [], total: 0, done: 0, topic: taskDictionary[t].topic });
+            Object.keys(taskDictionary).forEach(t => groupedTasks[t] = { courses: [], total: 0, done: 0, topic: taskDictionary[t].topic, duration: taskDictionary[t].duration || "" });
             groupedTasks["Other Courses"] = { courses: [], total: 0, done: 0, topic: "General Courses" };
 
             for (const [course, status] of Object.entries(currentStudent.courses)) {
                 globalTotal++;
-                const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+                const isDone = isDoneStatus(status);
                 if (isDone) globalDone++; else globalNotDone++;
 
                 const taskName = getTaskName(course);
@@ -234,6 +327,7 @@
                                     <span class="font-extrabold text-base md:text-lg tracking-tight">${taskName}</span>
                                     <span class="text-xs font-medium text-slate-400">| ${taskData.topic}</span>
                                 </div>
+                                ${taskData.duration ? `<div class="text-[11px] text-slate-400 mt-0.5">📅 ${taskData.duration}</div>` : ""}
                                 <div class="flex items-center gap-3 mt-2 max-w-xs">
                                     <div class="w-24 bg-slate-200 rounded-full h-1.5 overflow-hidden">
                                         <div class="${subProgressBarColor} h-full rounded-full transition-all duration-500" style="width: ${taskPercent}%"></div>
@@ -290,7 +384,7 @@
 
             // ค้นหาวิกาแบบเรียงเดี่ยว ไม่สน Task
             for (const [course, status] of Object.entries(currentStudent.courses)) {
-                const isDone = status.toLowerCase().trim().includes('done') && !status.toLowerCase().includes('not');
+                const isDone = isDoneStatus(status);
                 
                 // กรองวิชาตามเงื่อนไขกล่องที่กด
                 if (type === 'done' && !isDone) continue;
@@ -319,7 +413,7 @@
 
         // NEW: ฟังก์ชันสั่งปิดบล็อกวิชาแยกประเภท
         function closeStatusBlock() {
-            document.getElementById('statusCoursesBlock').classLinc = document.getElementById('statusCoursesBlock').classList.add('hidden');
+            document.getElementById('statusCoursesBlock').classList.add('hidden');
             document.getElementById('arrow-status-done').style.transform = 'rotate(0deg)';
             document.getElementById('arrow-status-notdone').style.transform = 'rotate(0deg)';
             currentOpenStatusType = null;
