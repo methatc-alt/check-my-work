@@ -198,8 +198,11 @@
 
         // แท็บ Students: StudentID | Name | <รหัสคอร์ส> ... (หัวคอลัมน์มีชื่อคอร์สต่อท้ายได้)
         function rowsToStudents(rows) {
-            const header = rows[0] || [];
-            return rows.slice(1).filter(r => r[0]).map(r => {
+            // หาแถวหัวตาราง (แถวที่มีคำว่า StudentID) — แถวที่อยู่ข้างบน (Task / ชื่อคอร์ส) จะถูกข้าม
+            let h = rows.findIndex(r => (r[0] || '').toLowerCase().replace(/\s/g, '').includes('studentid'));
+            if (h < 0) h = 0;
+            const header = rows[h] || [];
+            return rows.slice(h + 1).filter(r => r[0] && /\d/.test(r[0])).map(r => {
                 const courses = {};
                 for (let i = 2; i < header.length; i++) {
                     if (!header[i]) continue;
