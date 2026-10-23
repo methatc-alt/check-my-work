@@ -19,43 +19,53 @@ body{font-family:'Prompt',sans-serif;background:var(--bg);color:var(--ink);min-h
 button{font-family:inherit;cursor:pointer}
 
 /* top bar */
-.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.eyebrow{font-size:13px;font-weight:700;color:var(--blue);letter-spacing:.3px}
-.hello{font-size:26px;font-weight:700;margin-top:2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.sec{font-size:13px;font-weight:700;padding:3px 12px;border-radius:9px;background:var(--yellow-soft);color:var(--yellow-ink)}
-.sec.int{background:#E3DBFF;color:#5B47B8}
-.search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #DFE5EF;border-radius:999px;padding:5px 5px 5px 18px;min-width:320px}
+.topbar{background:#fff;border-bottom:1.5px solid var(--line)}
+.topbar .in{max-width:1180px;margin:0 auto;padding:12px 28px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;border-radius:11px;background:var(--blue);color:#fff;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center}
+.brand b{display:block;font-size:16px;line-height:1.2}
+.brand small{font-size:12px;color:var(--muted)}
+.search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #DFE5EF;border-radius:12px;padding:4px 4px 4px 14px}
 .search input{border:0;outline:0;font-family:inherit;font-size:15px;flex:1;min-width:0;background:transparent;color:var(--ink)}
-.search button{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:9px 20px;font-size:14px;font-weight:600}
+.search button{background:var(--blue);color:#fff;border:0;border-radius:9px;padding:8px 18px;font-size:14px;font-weight:600}
 .search button:active{transform:scale(.97)}
 .search:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px #1F6FA81a}
+.search.mini{width:300px}
+.sec{font-size:12.5px;font-weight:700;padding:2px 10px;border-radius:8px;background:var(--yellow-soft);color:var(--yellow-ink)}
+.sec.int{background:#E3DBFF;color:#5B47B8}
 
-/* hero */
-.hero{display:flex;align-items:center;gap:16px;margin-top:20px;background:#fff;border:1.5px solid var(--line);border-radius:24px;padding:16px 20px}
-.mascot{flex-shrink:0;cursor:pointer;transition:transform .2s}
-.mascot:hover{transform:rotate(-4deg) scale(1.04)}
-.mascot.bounce{animation:bounce .6s}
-@keyframes bounce{0%,100%{transform:translateY(0)}30%{transform:translateY(-14px)}60%{transform:translateY(0)}80%{transform:translateY(-5px)}}
-.bubble{position:relative;flex:1;background:#FFF8E7;border:2px solid var(--m-ink,#B5651D);border-radius:18px;padding:12px 16px;font-size:15px;line-height:1.6}
-.bubble:before{content:'';position:absolute;left:-12px;top:30px;border:10px solid transparent;border-right-color:var(--m-ink,#B5651D);border-left:0}
-.bubble:after{content:'';position:absolute;left:-8px;top:32px;border:8px solid transparent;border-right-color:#FFF8E7;border-left:0}
-.bubble .who{font-size:12px;font-weight:700;color:var(--m-ink,#B5651D);margin-bottom:2px}
-.bubble b{font-weight:700}
-.overall{width:270px;flex-shrink:0;background:var(--blue-soft);border-radius:20px;padding:14px 18px}
-.overall .lb{font-size:13px;font-weight:700;color:var(--blue)}
-.overall .pc{font-size:46px;font-weight:800;color:#123E5E;line-height:1.1}
-.overall .pc small{font-size:20px}
-.bar{height:10px;background:#ffffffaa;border-radius:6px;margin-top:6px;overflow:hidden}
+/* landing */
+.landing{max-width:520px;margin:70px auto 0;text-align:center}
+.landing .mascot{display:flex;justify-content:center;margin-bottom:-26px;position:relative;z-index:1}
+.landing .box{background:#fff;border:1.5px solid var(--line);border-radius:22px;padding:40px 30px 28px;text-align:left}
+.landing h1{font-size:22px;font-weight:700;text-align:center}
+.landing .lead{font-size:14px;color:var(--muted);text-align:center;margin-top:4px}
+.landing label{display:block;font-size:13px;font-weight:600;margin:22px 0 6px}
+.landing .search{padding:6px 6px 6px 16px}
+.landing .search input{font-size:17px}
+.landing .search button{padding:11px 22px;font-size:15px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:8px}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:22px}
+.dots i{width:10px;height:10px;border-radius:50%}
+.err{color:var(--red-ink);font-weight:600;font-size:13.5px;margin-top:10px}
+
+/* profile (หน้าผลลัพธ์) */
+.profile{display:flex;align-items:center;gap:22px;background:#fff;border:1.5px solid var(--line);border-radius:22px;padding:18px 24px}
+.profile .mascot{flex-shrink:0}
+.pinfo{flex:1;min-width:0}
+.pinfo .nm{font-size:22px;font-weight:700;line-height:1.3}
+.pinfo .meta{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:14px;color:var(--muted)}
+.next{margin-top:10px;font-size:13.5px;color:#4B5563}
+.next span{font-size:12px;font-weight:700;color:var(--blue);background:var(--blue-soft);padding:2px 8px;border-radius:6px;margin-right:6px}
+.prog{width:330px;flex-shrink:0;border-left:1.5px dashed var(--line);padding-left:22px}
+.prog .row1{display:flex;justify-content:space-between;align-items:baseline}
+.prog .lb{font-size:13px;font-weight:600;color:var(--muted)}
+.prog .pc{font-size:38px;font-weight:800;color:#123E5E;line-height:1.1}
+.prog .pc small{font-size:18px}
+.bar{height:10px;background:#EEF2F7;border-radius:6px;margin-top:6px;overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--blue);border-radius:6px;transition:width 1s ease}
-.overall .sub{font-size:13px;color:var(--blue);margin-top:6px;font-weight:600}
-
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-.stat{background:#fff;border:1.5px solid var(--line);border-radius:18px;padding:10px;text-align:center;cursor:default}
-.stat.click{cursor:pointer}
-.stat.click:hover{border-color:#cbd5e1}
-.stat b{display:block;font-size:24px}
-.stat span{font-size:13px;color:var(--muted)}
+.prog .sub{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:8px}
+.prog .sub b{color:var(--ink)}
 
 /* cards */
 .label{display:flex;justify-content:space-between;align-items:baseline;margin:22px 2px 12px;font-weight:700;font-size:16px}
@@ -87,28 +97,27 @@ button{font-family:inherit;cursor:pointer}
 .st{font-size:12px;font-weight:700;padding:3px 10px;border-radius:7px;flex-shrink:0}
 .st.y{background:var(--green-soft);color:var(--green-ink)}.st.n{background:var(--red-soft);color:var(--red-ink)}
 
-/* welcome / empty */
-.welcome{margin-top:28px;background:#fff;border:1.5px solid var(--line);border-radius:24px;padding:28px;display:flex;align-items:center;gap:20px}
-.welcome h2{font-size:22px}
-.welcome p{color:var(--muted);margin-top:4px;line-height:1.6}
-.err{color:var(--red-ink);font-weight:600;margin-top:8px}
 .foot{text-align:center;color:#A0A8B6;font-size:12px;margin-top:30px}
 .hidden{display:none!important}
 
 /* ---------- responsive ---------- */
 @media (max-width:1100px){ .grid{grid-template-columns:repeat(4,1fr)} }
+@media (max-width:860px){
+  .profile{flex-wrap:wrap}
+  .prog{width:100%;border-left:0;padding-left:0;border-top:1.5px dashed var(--line);padding-top:14px}
+}
 @media (max-width:760px){
-  .page{padding:20px 16px 40px}
-  .hero{flex-wrap:wrap}
-  .overall{width:100%}
-  .search{min-width:0;width:100%}
+  .page{padding:18px 16px 40px}
+  .topbar .in{padding:10px 16px;flex-wrap:wrap}
+  .search.mini{width:100%}
+  .landing{margin-top:36px}
 }
 @media (max-width:560px){
-  .hello{font-size:21px}
-  .hero{padding:14px;gap:10px}
-  .hero .mascot svg{width:84px;height:84px}
-  .bubble{font-size:13.5px;padding:10px 12px}
-  .bubble:before{top:22px}.bubble:after{top:24px}
+  .brand small{display:none}
+  .landing .box{padding:36px 18px 22px}
+  .profile{padding:14px 16px;gap:14px}
+  .profile .mascot svg{width:72px;height:72px}
+  .pinfo .nm{font-size:18px}
   .grid{gap:8px}
   .card{padding:10px 6px 12px;border-radius:16px}
   .card .tn{font-size:12px}
@@ -120,50 +129,50 @@ button{font-family:inherit;cursor:pointer}
   .row{font-size:12.5px;gap:8px}
   .code{width:64px}
   .st{display:none}
-  .welcome{flex-direction:column;text-align:center;padding:22px}
 }
 </style>
 </head>
 <body>
+<div class="topbar"><div class="in">
+  <div class="brand"><div class="logo">S</div><div><b>SET e-Learning Tracker</b><small>ภาควิชาเศรษฐศาสตร์ · ปีการศึกษา 2569</small></div></div>
+  <form class="search mini hidden" id="searchForm2" autocomplete="off">
+    <input id="studentId2" inputmode="numeric" placeholder="ค้นหารหัสอื่น">
+    <button type="submit">ค้นหา</button>
+  </form>
+</div></div>
+
 <div class="page">
-
-  <div class="top">
-    <div>
-      <div class="eyebrow">SET e-Learning · ปีการศึกษา 2569</div>
-      <div class="hello" id="hello">ตรวจสถานะคอร์สเรียน</div>
-    </div>
-    <form class="search" id="searchForm" autocomplete="off">
-      <input id="studentId" inputmode="numeric" placeholder="รหัสนักศึกษา เช่น 683320001-9">
-      <button type="submit">ค้นหา</button>
-    </form>
-  </div>
-
-  <!-- before search -->
-  <div class="welcome" id="welcome">
+  <!-- หน้าแรก -->
+  <div class="landing" id="welcome">
     <div class="mascot" id="welcomeMascot"></div>
-    <div>
-      <h2 id="welcomeTitle">สวัสดี!</h2>
-      <p>พิมพ์รหัสนักศึกษาด้านบน แล้วกด "ค้นหา" เพื่อดูว่าเรียนคอร์ส SET e-Learning ไปถึงไหนแล้ว<br>ใส่ขีด (-) หรือไม่ใส่ก็ได้</p>
-      <p class="err hidden" id="errMsg"></p>
+    <div class="box">
+      <h1>ตรวจสถานะคอร์ส <span style="white-space:nowrap">SET e-Learning</span></h1>
+      <div class="lead">ดูว่าผ่านคอร์สไหนแล้ว และเหลือคอร์สไหนบ้าง</div>
+      <label for="studentId">รหัสนักศึกษา</label>
+      <form class="search" id="searchForm" autocomplete="off">
+        <input id="studentId" inputmode="numeric" placeholder="เช่น 683320001-9">
+        <button type="submit">ค้นหา</button>
+      </form>
+      <div class="hint">ใส่ขีด (-) หรือไม่ใส่ก็ได้</div>
+      <div class="err hidden" id="errMsg"></div>
     </div>
+    <div class="dots" id="dots"></div>
   </div>
 
-  <!-- result -->
+  <!-- หน้าผลลัพธ์ -->
   <div id="result" class="hidden">
-    <div class="hero">
-      <div class="mascot" id="mascot" title="แตะเพื่อคุยกับฉัน"></div>
-      <div class="bubble" id="bubble"></div>
-      <div class="overall">
-        <div class="lb">ความคืบหน้ารวม</div>
-        <div class="pc"><span id="pct">0</span><small>%</small></div>
-        <div class="bar"><i id="pctBar"></i></div>
-        <div class="sub" id="pctSub"></div>
+    <div class="profile">
+      <div class="mascot" id="mascot"></div>
+      <div class="pinfo">
+        <div class="nm" id="pName"></div>
+        <div class="meta" id="pMeta"></div>
+        <div class="next" id="pNext"></div>
       </div>
-    </div>
-    <div class="stats">
-      <div class="stat"><b id="sDone">0</b><span>ผ่านแล้ว</span></div>
-      <div class="stat"><b id="sLeft">0</b><span>ยังเหลือ</span></div>
-      <div class="stat"><b id="sTask">0/0</b><span>Task ครบ</span></div>
+      <div class="prog">
+        <div class="row1"><span class="lb">ความคืบหน้ารวม</span><span class="pc"><span id="pct">0</span><small>%</small></span></div>
+        <div class="bar"><i id="pctBar"></i></div>
+        <div class="sub"><span>ผ่านแล้ว <b id="sDone">0</b> / <span id="sTotal">0</span> คอร์ส</span><span>Task ครบ <b id="sTask">0/0</b></span></div>
+      </div>
     </div>
 
     <div class="label">Task ทั้งหมด <span>แตะการ์ดเพื่อดูรายวิชา</span></div>
@@ -278,20 +287,6 @@ function mascotSVG(kind, mood, size){
     ${ears}<circle cx="60" cy="64" r="40" fill="${f}" stroke="${s}" stroke-width="${sw}"/>${deco}${eyes}${blush}${mouth}${extra}${after}</svg>`;
 }
 
-// ---------------------------------------------------------------------
-//  ข้อความของมาสคอต
-// ---------------------------------------------------------------------
-const TIPS = [
-  "เคล็ดลับ: ออมก่อนใช้ แบ่งเงินเก็บทันทีที่ได้เงินมา จะเก็บได้สม่ำเสมอกว่า",
-  "เคล็ดลับ: กระจายความเสี่ยง อย่าใส่ไข่ทุกฟองไว้ในตะกร้าใบเดียว",
-  "เคล็ดลับ: ยิ่งเริ่มลงทุนเร็ว ดอกเบี้ยทบต้นยิ่งทำงานให้เรานาน",
-  "เคล็ดลับ: ก่อนลงทุนกองทุนรวม อ่านหนังสือชี้ชวนให้เข้าใจก่อนทุกครั้ง",
-  "เคล็ดลับ: ผลตอบแทนสูงมักมาพร้อมความเสี่ยงสูง ถ้าใครบอกว่ารวยเร็วไม่มีเสี่ยง ระวังโดนหลอก!",
-  "เคล็ดลับ: มีเงินสำรองฉุกเฉินไว้สัก 3–6 เดือนของค่าใช้จ่าย จะอุ่นใจขึ้นเยอะ",
-];
-const CHEERS = ["สู้ๆ นะ!", "ทำได้อยู่แล้ว!", "วันละคอร์สก็ถึงเส้นชัยได้", "เก่งมากที่เข้ามาเช็คนะ", "พักบ้างก็ได้ แต่อย่าลืมกลับมาเรียนต่อนะ"];
-let tipIndex = Math.floor(Math.random() * TIPS.length);
-
 function moodFor(pct){ return pct >= 100 ? "party" : (pct <= 20 ? "sleepy" : "happy"); }
 
 function setMascot(elId, mood, size){
@@ -395,33 +390,24 @@ function render(){
   const firstOpen = tasks.find(t => !t.full);
   const nextCourse = firstOpen ? firstOpen.list.find(c => !c.done) : null;
 
-  // header
+  // profile
   const sec = String(current.sec || '').trim().toUpperCase();
   const isInt = sec.startsWith('INT');
-  document.getElementById('hello').innerHTML =
-    `สวัสดี, ${escapeHtml(current.name || current.id)}` + (sec ? ` <span class="sec ${isInt ? 'int' : ''}">Sec ${isInt ? 'INT' : escapeHtml(sec)}</span>` : '');
+  document.getElementById('pName').textContent = current.name || current.id;
+  document.getElementById('pMeta').innerHTML = `<span>${escapeHtml(current.id)}</span>` +
+    (sec ? `<span class="sec ${isInt ? 'int' : ''}">Sec ${isInt ? 'INT' : escapeHtml(sec)}</span>` : '');
+  document.getElementById('pNext').innerHTML = nextCourse
+    ? `<span>คอร์สถัดไป</span><b>${nextCourse.code}</b> ${escapeHtml(nextCourse.name)}`
+    : `<span>สถานะ</span>ผ่านครบทุกคอร์สแล้ว`;
+  setMascot('mascot', moodFor(pct), 96);
 
   // summary
   document.getElementById('pct').textContent = pct;
-  document.getElementById('pctSub').textContent = `${done} / ${total} คอร์ส`;
+  document.getElementById('pctBar').style.width = '0';
   setTimeout(() => document.getElementById('pctBar').style.width = pct + '%', 60);
   document.getElementById('sDone').textContent = done;
-  document.getElementById('sLeft').textContent = total - done;
+  document.getElementById('sTotal').textContent = total;
   document.getElementById('sTask').textContent = `${fullTasks}/${tasks.length}`;
-
-  // mascot + bubble
-  const mood = moodFor(pct);
-  setMascot('mascot', mood, 118);
-  const who = `<div class="who">${ANIMALS[animal].name}</div>`;
-  let msg;
-  if (pct >= 100) msg = `<b>จบครบทุก Task แล้ว! เก่งที่สุดเลย 🎉</b><br>อย่าลืมดาวน์โหลดใบเซอร์ไว้ให้ครบนะ`;
-  else if (done === 0) msg = `<b>ยังไม่ได้เริ่มเลยน้า มาเริ่มกันเถอะ!</b><br>คอร์สแรกที่ควรเรียน: <b>${nextCourse.code}</b> ${escapeHtml(nextCourse.name)}`;
-  else {
-    const left = firstOpen.total - firstOpen.done;
-    msg = `<b>${fullTasks > 0 ? `เก่งมาก! ผ่านไปแล้ว ${fullTasks} Task 🎉` : `เริ่มได้ดีมาก! ผ่านไปแล้ว ${done} คอร์ส`}</b><br>อีกแค่ ${left} คอร์สก็จบ <u>${escapeHtml(firstOpen.name)}</u> แล้ว · ถัดไป: <b>${nextCourse.code}</b> ${escapeHtml(nextCourse.name)}`;
-  }
-  document.getElementById('bubble').innerHTML = who + msg;
-  document.getElementById('bubble').dataset.main = who + msg;
 
   // cards
   const grid = document.getElementById('grid');
@@ -462,24 +448,14 @@ function celebrate(t, i){
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// แตะมาสคอต → ให้กำลังใจ / เคล็ดลับ
-let tapCount = 0;
-document.getElementById('mascot').addEventListener('click', () => {
-  const m = document.getElementById('mascot'), b = document.getElementById('bubble');
-  m.classList.remove('bounce'); void m.offsetWidth; m.classList.add('bounce');
-  tapCount++;
-  if (tapCount % 3 === 0) { b.innerHTML = b.dataset.main; return; }
-  const text = (tapCount % 3 === 1) ? TIPS[(tipIndex++) % TIPS.length] : CHEERS[Math.floor(Math.random() * CHEERS.length)];
-  b.innerHTML = `<div class="who">${ANIMALS[animal].name}</div>${text}`;
-});
-
 // ค้นหา
 let cache = null;
 async function search(e){
   if (e) e.preventDefault();
-  const raw = document.getElementById('studentId').value.trim();
-  const err = document.getElementById('errMsg');
+  const input = (e && e.target && e.target.querySelector) ? e.target.querySelector('input') : document.getElementById('studentId');
+  const raw = input.value.trim();
   if (!raw) return;
+  document.getElementById('errMsg').classList.add('hidden');
   const key = raw.replace(/[-\s]/g, '');
   try {
     cache = await loadAll();
@@ -496,24 +472,31 @@ async function search(e){
   celebrated.clear();
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('result').classList.remove('hidden');
+  document.getElementById('searchForm2').classList.remove('hidden');
+  document.getElementById('studentId').value = raw;
+  document.getElementById('studentId2').value = '';
   render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function showError(text){
   current = null;
   document.getElementById('result').classList.add('hidden');
   document.getElementById('welcome').classList.remove('hidden');
-  document.getElementById('hello').textContent = 'ตรวจสถานะคอร์สเรียน';
+  document.getElementById('searchForm2').classList.add('hidden');
   const err = document.getElementById('errMsg');
   err.textContent = text; err.classList.remove('hidden');
 }
 document.getElementById('searchForm').addEventListener('submit', search);
+document.getElementById('searchForm2').addEventListener('submit', search);
+document.querySelector('.brand').style.cursor = 'pointer';
+document.querySelector('.brand').addEventListener('click', () => { current = null; document.getElementById('result').classList.add('hidden'); document.getElementById('welcome').classList.remove('hidden'); document.getElementById('searchForm2').classList.add('hidden'); document.getElementById('errMsg').classList.add('hidden'); });
 
-// เริ่มต้น
-setMascot('welcomeMascot', 'happy', 120);
-document.getElementById('welcomeTitle').textContent = `สวัสดี! ${ANIMALS[animal].name}มาช่วยเช็คให้`;
+// เริ่มต้น: มาสคอตหน้าแรก + จุดสี Task + เติมรหัสล่าสุดไว้ให้
+setMascot('welcomeMascot', 'happy', 92);
+document.getElementById('dots').innerHTML = PASTEL.map((p, i) => `<i style="background:${p};border:1.5px solid ${INK[i]}"></i>`).join('');
 try {
   const last = localStorage.getItem('lastStudentId');
-  if (last){ document.getElementById('studentId').value = last; search(); }
+  if (last) document.getElementById('studentId').value = last;
 } catch(e){}
 </script>
 </body>
